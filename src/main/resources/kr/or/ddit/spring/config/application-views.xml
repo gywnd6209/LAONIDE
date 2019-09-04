@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+
+	<!-- 
+		컨트롤러 메서드의 반환값 ModelAndView에 저장된 데이터(List, Map, VO, etc..)
+		json형식 문자열로 변경 후 클라이언트에 전송
+	 
+	 	beanNameViewResolver -> 상속받은 애 찾음 : 1순위 :jsonConvertView 찾음. 그리고나서 얘한테 리절트를 줌 -> 제이슨으로 바꿈->응답버퍼로바꿈
+	 -->
+	 <bean id="jsonConvertView" class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"></bean>
+</beans>

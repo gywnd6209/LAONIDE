@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap     
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="grand">
+	
+	<typeAlias alias="grandVO" type="kr.or.ddit.vo.GrandVO"></typeAlias>
+	
+	<resultMap id="grandMap" class="grandVO">
+		<result property="grand_code" column="grand_code"/>
+		<result property="grand_name" column="grand_name"/>
+	</resultMap>
+	
+	
+	<sql id="selectAll">
+		SELECT *
+		FROM GRAND
+	</sql>
+	
+	<select id="grandList" resultClass="grandVO">
+		<include refid="selectAll"/>
+	</select>
+	
+</sqlMap>

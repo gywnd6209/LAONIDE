@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+ <sqlMap namespace="libraryFileitem">
+ 	<typeAlias alias="fileitemVO" type="kr.or.ddit.vo.LibraryfileVO"></typeAlias>
+ 	
+ 	<statement id="fileItemList" resultClass="fileitemVO">
+ 		SELECT *
+ 		FROM library_file
+ 		WHERE file_bo_no = #bo_no#
+ 	</statement>
+ 	
+	<insert id="insertFileItem" parameterClass="fileitemVO">
+		<selectKey keyProperty="file_seq">
+			SELECT LIBRARY_FILEITEM_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO LIBRARY_FILE (file_seq
+								 ,file_bo_no
+							  	 ,file_name
+								 ,file_save_name
+								 ,file_cont_type
+								 ,file_size)	
+					VALUES(#file_seq#
+						  ,#file_bo_no#
+						  ,#file_name#
+						  ,#file_save_name#
+						  ,#file_cont_type#
+						  ,#file_size#)
+	</insert>
+	<select id="fileItemInfo" parameterClass="map" resultClass="fileitemVO">
+		SELECT *
+		FROM library_file
+ 		WHERE file_seq = #file_seq#
+	</select>
+	
+ </sqlMap>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

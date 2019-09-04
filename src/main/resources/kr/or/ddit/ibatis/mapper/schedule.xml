@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap     
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<!-- 이 doc타입이 엘리먼트 선언순서 이런거 알려줌, 그아래 하위 속성, 어트리뷰트가 가질수 있는 값 선언 원래꺼에서 config 
+	지움, dtd : 해당 xml 형식 -->
+<sqlMap namespace="schedule">
+	<typeAlias alias="scheduleVO" type="kr.or.ddit.vo.ScheduleVO"></typeAlias>
+	<typeAlias alias="crewInfoVO" type="kr.or.ddit.vo.CrewInfoVO"></typeAlias>
+	
+<!-- 	<resultMap class="scheduleVO" id="scheduleMap"> -->
+<!-- 		<result property="schedule_no" column="schedule_no" /> -->
+<!-- 		<result property="title" column="title" /> -->
+<!-- 		<result property="username" column="username" /> -->
+<!-- 		<result property="startdate" column="startdate" /> -->
+<!-- 		<result property="enddate" column="enddate" /> -->
+<!-- 		<result property="description" column="description" /> -->
+<!-- 		<result property="pro_code" column="pro_code" /> -->
+<!-- 		<result property="backgroundcolor" column="backgroundcolor" /> -->
+<!-- 		<result property="allday" column="allday" /> -->
+<!-- 		<result property="textcolor" column="textcolor" /> -->
+<!-- 		<result property="type" column="type" /> -->
+<!-- 	</resultMap> -->
+
+
+	<sql id="selectAll">
+		SELECT 
+		SCHEDULE_NO
+		,TITLE
+		,USERNAME
+		,DESCRIPTION
+		,PRO_CODE
+		,BACKGROUNDCOLOR
+		,ALLDAY
+		,TEXTCOLOR
+		,TYPE
+		,TO_CHAR(STARTDATE, 'YYYY-MM-DD HH24:MI') AS STARTDATE
+		,TO_CHAR(ENDDATE, 'YYYY-MM-DD HH24:MI') AS ENDDATE 
+		,BO_NO
+		 FROM SCHEDULE
+		WHERE PRO_CODE = #pro_code#
+	</sql>
+	
+	<select id="crewList" resultClass="crewInfoVO">
+		SELECT B.MEM_ID as MEM_ID, B.MEM_NICK as MEM_NICK, A.GRAND_CODE as GRAND_CODE,
+				A.PRO_CODE as PRO_CODE, A.TEAM_JOIN_DATE as TEAM_JOIN_DATE
+		FROM CREW_INFO A, MEMBER B
+			WHERE A.PRO_CODE = #pro_code#
+			  AND A.MEM_ID = B.MEM_ID
+		ORDER BY A.MEM_ID
+	</select>
+	
+	<select id="scheduleList" parameterClass="map" resultClass="scheduleVO">
+		<include refid="selectAll" />
+		<!-- 유저 체크박스 필터 -->
+<!-- 		<dynamic prepend="AND"> -->
+<!-- 			<isNotEmpty property="checkbox_filter"> -->
+<!-- 				schedule_writer = #checkbox_filter# -->
+<!-- 			</isNotEmpty> -->
+<!-- 		</dynamic> -->
+<!-- 		or username = #username#  -->
+		order by username desc
+	</select>
+
+	<insert id="insertSchedule" parameterClass="scheduleVO">
+		<selectKey keyProperty="schedule_no" resultClass="String">
+			select schedule_seq.nextval
+			from dual
+		</selectKey>
+		insert into schedule(
+			schedule_no,
+			title,
+			description,
+			startdate,
+			enddate,
+			type,
+			username,
+			backgroundcolor,
+			textcolor,
+			allday,
+			pro_code
+		)
+		values(
+			#schedule_no#,
+			#title#,
+			#description#,
+			to_date(#startdate#,'yyyy-MM-dd HH24:mi'),
+			to_date(#enddate#,'yyyy-MM-dd HH24:mi'),
+			#type#,
+			#username#,
+			#backgroundcolor#,
+			#textcolor#,
+			#allday#,
+			#pro_code#)
+	</insert>
+
+	<delete id="deleteSchedule" parameterClass="scheduleVO">
+		delete from schedule
+		where schedule_no = #schedule_no#
+	</delete>
+	
+	<update id="updateSchedule" parameterClass="scheduleVO">
+		update schedule set 
+							title= #title#
+							, description = #description#
+							, startdate= to_date(#startdate#,'yyyy-MM-dd HH24:mi')
+							, enddate= to_date(#enddate#,'yyyy-MM-dd HH24:mi')
+							, type= #type#
+							, backgroundcolor= #backgroundcolor#
+							, textcolor= #textcolor#
+							, allday= #allday#
+		where schedule_no = #schedule_no#
+	</update>
+	
+	<update id="dropupdate" parameterClass="scheduleVO">
+		update schedule set startdate= to_date(#startdate#,'yyyy-MM-dd HH24:mi')
+							, enddate= to_date(#enddate#,'yyyy-MM-dd HH24:mi')
+		where schedule_no = #schedule_no#
+	</update>
+</sqlMap>

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Config모두 지우셈 -->
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+ <sqlMap namespace="faqboard">
+ 	<typeAlias alias="faqboardVO" type="kr.or.ddit.vo.FaqVO"></typeAlias>
+ 	
+ 	<resultMap class="faqboardVO" id="faqboardMap">
+ 		<result property="bo_no" 		column="bo_no"/>
+		<result property="bo_que_title" column="bo_que_title"/>
+		<result property="bo_que_cont" 	column="bo_que_cont"/>
+		<result property="bo_ans_cont" 	column="bo_ans_cont"/>
+		<result property="bo_writer" 	column="bo_writer"/>
+		<result property="bo_date" 		column="bo_date"/>
+		<result property="bo_hit" 		column="bo_hit"/>
+		<result property="bo_status" 	column="bo_status"/>
+		<result property="mem_id" 		column="mem_id"/>
+ 	</resultMap>
+
+ 	<sql id = "selectAll">
+ 		SELECT *
+ 			FROM faq
+ 		  WHERE bo_status = 'N'
+ 	</sql>
+ 	
+ 	<sql id="searchCondition">
+ 		<dynamic prepend="AND">
+			<isNotEmpty property="search_keyword" open="(" close=")"> 
+				<isEqual property="search_keycode" compareValue="TOTAL">
+						BO_QUE_TITLE LIKE '%'||#search_keyword#||'%'
+				  OR 	BO_QUE_CONT LIKE '%'||#search_keyword#||'%'
+				  OR 	BO_ANS_CONT LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="QUE_TITLE">
+						BO_QUE_TITLE LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="QUE_CONTENT">
+						BO_QUE_CONT LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="ANS_CONTENT">
+						BO_ANS_CONT LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+			</isNotEmpty>
+ 		</dynamic>
+ 	</sql>
+ 	
+ 	<select id="faqboardAllList" parameterClass="map" resultClass="faqboardVO">
+ 		SELECT B.*
+    	 FROM(SELECT ROWNUM rnum, A.* 
+	 			FROM (<include refid="selectAll"/>
+	 				  <include refid="searchCondition"/>
+	            		ORDER BY bo_date) A) B
+		     <![CDATA[      		
+		     WHERE B.RNUM <= #startCount# 
+	 	       AND B.RNUM >= #endCount# 
+	 	       ]]>   
+	    ORDER BY RNUM DESC
+ 	</select>
+ 	
+ 	<select id="faqboardView" parameterClass="map" resultMap="faqboardMap">
+ 		<include refid="selectAll"/>
+ 			AND bo_no = #bo_no#
+ 	</select>
+ 	
+ 	<insert id="insertFaqInfo" parameterClass="faqboardVO" >
+ 		<selectKey keyProperty="bo_no" resultClass="string"> 
+ 			SELECT FAQ_SEQ.NEXTVAL
+ 				FROM DUAL	
+ 		</selectKey>
+ 			INSERT INTO faq(bo_no
+							,bo_que_title
+							,bo_que_cont
+							,bo_ans_cont
+							,bo_date
+							,bo_status
+							,bo_writer
+							,mem_id
+								)
+						VALUES(	#bo_no#
+								,#bo_que_title#
+								,#bo_que_cont#
+								,#bo_ans_cont#
+								,sysdate
+								,'N'
+								,#bo_writer#
+								,#mem_id#
+								)
+ 	</insert>
+ 	
+ 	<update id="updateFaqInfo" parameterClass="faqboardVO">
+ 		UPDATE faq SET
+			bo_que_title	= #bo_que_title#
+			<isNotEmpty property="bo_que_cont">
+			,bo_que_cont	= #bo_que_cont#
+			</isNotEmpty>
+			<isNotEmpty property="bo_ans_cont">
+			,bo_ans_cont	= #bo_ans_cont#
+			</isNotEmpty>
+		WHERE bo_no = #bo_no#	 
+ 	</update>
+ 	
+ 	<update id="updateHit" parameterClass="map">
+ 		UPDATE faq 
+		SET bo_hit = bo_hit + 1
+		WHERE bo_no = #bo_no#
+ 	</update>
+
+	<update id="deleteFaqInfo" parameterClass="map">
+ 		UPDATE faq SET
+			bo_status	= 'Y'
+		WHERE bo_no = #bo_no#	 
+ 	</update> 	
+ 	
+ 	<select id="totalCount" parameterClass="map" resultClass="int">
+		SELECT COUNT(bo_no)
+			FROM faq
+			WHERE BO_STATUS = 'N'
+<!-- 			 and BO_SEQ = 0 -->
+			<include refid="searchCondition"/>
+	</select>
+ </sqlMap>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

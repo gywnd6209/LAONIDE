@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+	<WatchedResource>WEB-INF/web.xml</WatchedResource>
+	<Resource name="jdbc/ddit"
+			  auth="eunhye"
+			  type="javax.sql.DataSource"
+			  driverClassName="oracle.jdbc.driver.OracleDriver"
+			  url="jdbc:oracle:thin:@112.220.114.130:1521:XE"
+			  username="ariari"
+			  password="java"
+			  maxActive="10"
+			  maxIdle="8"
+			  removeAbandoned="true"
+			  removeAbandonedTimeout="60"
+			  factory="org.apache.tomcat.dbcp.dbcp.BasicDataSourceFactory"></Resource>
+</Context>

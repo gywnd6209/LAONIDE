@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+ <sqlMap namespace="cahtlog">
+ 	<typeAlias alias="ChatLogVO" type="kr.or.ddit.vo.ChatLogVO"></typeAlias>
+ 	 	
+ 	<!-- 현재 세션의 아이디에 맞는 알람에 들어갈 내용 띄우기 -->
+	<select id="chatList" resultClass="ChatLogVO" parameterClass="map">
+		SELECT CHAT_NO
+			  ,CHAT_CONT
+			  ,TO_CHAR(CHAT_TIME,'yyyy.mm.dd AM hh:mi', 'nls_date_language=american') AS CHAT_TIME
+			  ,MEM_ID
+			  ,MEM_NICK
+			  ,PRO_LINK
+		FROM CHAT_LOG
+		WHERE PRO_LINK = #pro_link#
+		ORDER BY CHAT_NO
+	</select>
+	
+	<select id="chatTime" resultClass="String" parameterClass="map">
+		SELECT TO_CHAR(CHAT_TIME,'yyyy.mm.dd AM hh:mi', 'nls_date_language=american') AS CHAT_TIME
+		FROM CHAT_LOG
+		WHERE CHAT_NO = #chat_no#
+	</select>
+
+	<!-- 필요한 값 : MEM_ID, CHAT_NO, PRO_LINK, MEM_NICK -->
+	<insert id="insertChatLog" parameterClass="map">
+		<selectKey keyProperty="chat_no" resultClass="String">
+			SELECT CHAT_LOG_SEQ.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO CHAT_LOG ( CHAT_NO, CHAT_CONT, CHAT_TIME, MEM_ID, MEM_NICK, PRO_LINK )
+		VALUES (#chat_no#, #chat_cont#, TO_DATE(#chat_time#,'YYYY-MM-DD HH24:MI:SS'), #mem_id#, #mem_nick#, #pro_link# )
+	</insert>
+ </sqlMap>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

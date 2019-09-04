@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap     
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="idefile">
+	
+	<typeAlias alias="idefileVO" type="kr.or.ddit.vo.IdeFileVO"></typeAlias>
+	
+	<resultMap id="idefileMap" class="idefileVO">
+		<result property="file_no" column="file_no"/>
+		<result property="folder_name" column="folder_name"/>
+		<result property="file_path" column="file_path"/>
+		<result property="file_name" column="file_name"/>
+		<result property="file_save_name" column="file_save_name"/>
+		<result property="file_type" column="file_type"/>
+		<result property="file_size" column="file_size"/>
+		<result property="file_date" column="file_date"/>
+		<result property="ide_no" column="ide_no"/>
+	</resultMap>
+	
+	
+	<sql id="selectAll">
+		SELECT *
+		FROM IDE_FILE
+	</sql>
+
+	<select id="idefileInfo" parameterClass="map" resultMap="idefileMap">
+		<include refid="selectAll"/>
+		AND FILE_NO = #file_no#
+	</select>
+	
+	<insert id="insertIdefile" parameterClass="idefileVO">
+		<selectKey keyProperty="file_no" resultClass="string">
+			SELECT IDE_FILE_SEQ.NEXTVAL
+				FROM DUAL
+		</selectKey>
+		INSERT INTO IDE_FILE(FILE_NO
+							,FOLDER_NAME
+							,FILE_PATH
+							,FILE_NAME
+							,FILE_SAVE_NAME
+							,FILE_TYPE
+							,FILE_SIZE
+							,FILE_DATE
+							,IDE_NO)
+						VALUES(#file_no#
+								,#folder_name#
+								,#file_path#
+								,#file_name#
+								,#file_name#
+								,#file_type#
+								,#file_size#
+								,to_date(sysdate, 'YYYY-MM-DD')
+								,#ide_no#)
+	
+	</insert>
+	
+<!--  	<update id="deleteRecruitboardInfo" parameterClass="map"> -->
+<!--  		UPDATE RECRUIT_BOARD -->
+<!--  			SET BO_STATUS = 'y' -->
+<!--  		WHERE BO_NO = #bo_no# -->
+ 			
+ 			 
+<!--  	</update> -->
+	  
+<!-- 	<update id="updateRecruitboard" parameterClass="recruitboardVO"> -->
+<!-- 		UPDATE RECRUIT_BOARD -->
+<!-- 			SET  BO_TITLE = #bo_title# -->
+<!-- 				,BO_CONTENT = #bo_content# -->
+<!-- 				,BO_BEGIN_DATE = to_date(#bo_begin_date#, 'YYYY-MM-DD') -->
+<!-- 				,BO_END_DATE = to_date(#bo_end_date#, 'YYYY-MM-DD') -->
+<!-- 				,BO_PERSON = #bo_person# -->
+<!-- 		WHERE BO_NO = #bo_no# -->
+<!-- 	</update> -->
+	
+</sqlMap>

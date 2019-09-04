@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+   PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+   "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+   
+<sqlMap namespace="freeboard">
+	<typeAlias alias="freeboardVO" type="kr.or.ddit.vo.FreeboardVO"></typeAlias>
+	
+	<resultMap class="freeboardVO" id="freeboardMap">
+		<result property="bo_no" column="bo_no"/>
+		<result property="bo_title" column="bo_title"/>
+		<result property="bo_cont" column="bo_cont"/>
+		<result property="bo_date" column="bo_date"/>
+		<result property="bo_hit" column="bo_hit"/>
+		<result property="bo_status" column="bo_status"/>
+		<result property="bo_group" column="bo_group"/>
+		<result property="bo_seq" column="bo_seq"/>
+		<result property="bo_writer" column="bo_writer"/>
+		<result property="mem_id" column="mem_id"/>
+		<result property="items" column="bo_no" select="freeboardFileitem.freefileItemList"/>
+	</resultMap>
+	
+	<sql id = "selectAll">
+		select * 
+			from freeboard 
+		  where bo_status = 'n' 
+	</sql>
+	
+	<sql id="searchCondition">
+		<dynamic prepend="and">
+			<isNotEmpty property="search_keyword" open="(" close=")"> 
+				<isEqual property="search_keycode" compareValue="total">
+					bo_title like '%'||#search_keyword#||'%'
+					or bo_cont like '%'||#search_keyword#||'%'
+					or bo_writer like '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="title">
+						bo_title like '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="content">
+						bo_cont like '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="writer">
+						bo_writer like '%'||#search_keyword#||'%'
+				</isEqual>
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	<select id="freeboardList" parameterClass="map" resultClass="freeboardVO">
+		SELECT B.*
+			FROM(SELECT ROWNUM rnum, A.* 
+				FROM (<include refid="selectAll"/>
+						AND BO_SEQ = '0'
+						<include refid="searchCondition"/>
+				ORDER BY BO_NO) A) B
+			<![CDATA[
+				WHERE B.RNUM <= #startCount#
+				AND B.RNUM >= #endCount#
+			]]>
+		ORDER BY RNUM DESC
+	</select>
+	
+	<select id="freeboardInfo" parameterClass="map" resultMap="freeboardMap">
+		<include refid="selectAll"/>
+			AND bo_no = #bo_no#
+	</select>
+	
+	<insert id="insertFreeboard" parameterClass="freeboardVO" >
+		<selectKey keyProperty="bo_no" resultClass="string"> 
+			SELECT FREEBOARD_SEQ.NEXTVAL
+				FROM DUAL	
+		</selectKey>
+			INSERT INTO freeboard(bo_no
+							,bo_title
+							,bo_cont
+							,bo_writer
+							,bo_date
+							,bo_group
+							,bo_seq
+							,mem_id
+								)
+						VALUES(	#bo_no#
+								,#bo_title#
+								,#bo_cont#
+								,#bo_writer#
+								,sysdate
+								,#bo_no#
+								,'0'
+								,#mem_id#
+								)
+	</insert>
+	
+	<update id="updateHit" parameterClass="map">
+		UPDATE freeboard 
+			SET bo_hit = CAST(bo_hit + 1 AS NUMBER(10)) 
+		WHERE bo_no = #bo_no# 
+	</update>
+	
+	<select id="incrementSeq" parameterClass="freeboardVO" resultClass="String">
+		SELECT 
+			MAX(BO_SEQ) + 1	
+		FROM freeboard
+		WHERE BO_GROUP = #bo_group#
+	</select>
+	
+	<update id="updateFreeboard" parameterClass="freeboardVO">
+		update freeboard set
+			bo_title	= #bo_title#
+			<isNotEmpty property="bo_cont">
+			,bo_cont	= #bo_cont#
+			</isNotEmpty>
+		WHERE bo_no = #bo_no#
+	</update>
+	
+	<update id="deleteFreeboard" parameterClass="map">
+		UPDATE freeboard SET
+			bo_status	= 'y'
+		WHERE bo_no = #bo_no#	 
+	</update> 	
+	
+	<select id="totalCount" parameterClass="map" resultClass="int">
+		SELECT COUNT(bo_no)
+			FROM freeboard
+			WHERE BO_STATUS = 'n'
+			AND BO_SEQ = '0'
+			<include refid="searchCondition"/>
+	</select>
+	
+	<!-- 댓글리스트 출력 -->
+	<select id="freeboardReplyList" parameterClass="map" resultMap="freeboardMap">
+		<include refid="selectAll"/>
+		AND BO_GROUP = #bo_no#
+		<![CDATA[ 
+			AND BO_SEQ > '0'
+		]]>
+		ORDER BY BO_NO
+	</select>
+	
+	<!-- 댓글 삽입 -->
+	<insert id="insertFreeboardReply" parameterClass="freeboardVO">
+		<selectKey keyProperty="bo_no" resultClass="String">
+			select freeboard_seq.nextval
+			from dual
+		</selectKey>
+		insert into freeboard(
+								 bo_no
+								,bo_cont
+								,bo_writer
+								,bo_group
+								,bo_seq
+								,bo_date
+								,mem_id
+							)values
+							(
+								 #bo_no#
+								,#bo_cont#
+								,#bo_writer#
+								,#bo_group#
+								,#bo_seq#
+								,sysdate
+								,#mem_id#
+							)
+	</insert>
+	
+	<!-- 댓글 수정 -->
+	<update id="updateFreeboardReply" parameterClass="freeboardVO">
+		UPDATE freeboard 
+		set bo_cont 	= #bo_cont#
+		<isNotEmpty property="mem_id">
+			,mem_id 	= #mem_id#
+		</isNotEmpty>
+		<isNotEmpty property="bo_writer">
+			,bo_writer 	= #bo_writer#
+		</isNotEmpty>
+		where bo_no 	= #bo_no#
+	</update>
+</sqlMap>

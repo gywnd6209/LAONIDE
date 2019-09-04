@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap     
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="proInfo">
+	
+	<typeAlias alias="proInfoVO" type="kr.or.ddit.vo.ProInfoVO"></typeAlias>
+	
+	<resultMap id="proInfoMap" class="proInfoVO">
+		<result property="pro_code" 		column="pro_code"/>
+		<result property="pro_name" 		column="pro_name"/>
+		<result property="pro_cont" 		column="pro_cont"/>
+		<result property="pro_date" 		column="pro_date"/>
+		<result property="crew_cnt" 		column="crew_cnt"/>
+		<result property="pro_begin_date" 	column="pro_begin_date"/>
+		<result property="pro_end_date" 	column="pro_end_date"/>
+		<result property="bo_no" 			column="bo_no"/>
+		<result property="mem_id" 			column="mem_id"/>
+		<result property="pro_status" 		column="pro_status"/>
+		<result property="grand_code" 		column="grand_code"/>
+		<result property="members" 	 column="mem_id"   select="member.memberInfo2"/>
+		<result property="items" 	 column="pro_code" select="crewInfo.crewProInfo"/>
+		<result property="issuItems" column="pro_code" select="issueboard.issueList"/>
+		<result property="errItems"  column="pro_code" select="errboard.errList"/>
+	</resultMap>
+	
+	
+	<resultMap id="proInfoMap1" class="proInfoVO">
+		<result property="pro_code" 		column="pro_code"/>
+		<result property="pro_name" 		column="pro_name"/>
+		<result property="pro_cont" 		column="pro_cont"/>
+		<result property="pro_date" 		column="pro_date"/>
+		<result property="crew_cnt" 		column="crew_cnt"/>
+		<result property="pro_begin_date" 	column="pro_begin_date"/>
+		<result property="pro_end_date" 	column="pro_end_date"/>
+		<result property="bo_no" 			column="bo_no"/>
+		<result property="pro_status" 		column="pro_status"/>
+		
+	</resultMap>
+	
+	<sql id="selectAll">
+		SELECT *
+		FROM PRO_INFO
+	</sql>
+	
+	<select id="proInfoInfo" parameterClass="map" resultMap="proInfoMap1">
+		<include refid="selectAll"/>
+		WHERE BO_NO = #bo_no#
+		and pro_status = 'N'
+	</select>
+	
+	<select id="proInfoList" resultClass="proInfoVO">
+		<include refid="selectAll"/>
+	</select>
+	
+	<insert id="insertProInfo" parameterClass="proInfoVO">
+		<selectKey keyProperty="pro_code" resultClass="string">
+			SELECT PRO_INFO_SEQ.NEXTVAL
+				FROM DUAL
+		</selectKey>
+		INSERT INTO PRO_INFO	(PRO_CODE
+								,PRO_NAME
+								,PRO_CONT
+								,PRO_DATE
+								,CREW_CNT
+								,PRO_BEGIN_DATE
+								,PRO_END_DATE
+								,BO_NO
+								,PRO_LINK
+								)
+						VALUES( #pro_code#
+								,#pro_name#
+								,#pro_cont#
+								,to_date(sysdate, 'YYYY-MM-DD')
+								,#crew_cnt#
+								,to_date(#pro_begin_date#, 'YYYY-MM-DD')
+								,to_date(#pro_end_date#, 'YYYY-MM-DD')
+								,#bo_no#
+								,(SELECT DBMS_RANDOM.STRING('X', 10) STR FROM DUAL)
+								)
+	</insert>
+	
+	<!-- 프로젝트 정보 출력하기 -->
+	<select id="proInfoMain" parameterClass="map"  resultMap="proInfoMap">
+		SELECT   b.pro_code as pro_code, b.pro_name as pro_name, b.pro_cont as pro_cont, b.pro_date as pro_date,
+				 b.crew_cnt as crew_cnt, b.pro_begin_date as pro_begin_date, b.pro_end_date as pro_end_date, a.mem_id as mem_id,
+				 c.grand_code as grand_code, b.bo_no as bo_no, b.pro_status as pro_status
+        	FROM PRO_INFO b, 
+ 				(SELECT * FROM CREW_INFO WHERE MEM_ID = #mem_id#) a,
+            	CREW_INFO c,
+            	MEMBER d
+    	WHERE a.PRO_CODE 	= b.PRO_CODE
+          AND c.mem_id 		= a.mem_id
+          AND a.PRO_CODE 	= c.PRO_CODE
+          AND b.PRO_STATUS  = 'N'
+          AND c.mem_id 		= d.mem_id
+          AND d.mem_del 	= 'n'
+         ORDER BY  b.pro_date
+	</select>
+		
+	<!-- 프로젝트 선택 정보 출력하기 -->
+	<select id="proInfoListDetail" parameterClass="map"  resultMap="proInfoMap">
+		SELECT  * FROM PRO_INFO b, 
+ 					   (SELECT * FROM CREW_INFO WHERE MEM_ID = #mem_id#) a
+    	WHERE a.PRO_CODE = b.PRO_CODE
+    	  AND a.PRO_CODE = #pro_code#
+	</select>
+	
+	<!-- 프로젝트 정보 수정 -->
+	<update id="updateProInfo" parameterClass="proInfoVO">
+		UPDATE PRO_INFO 
+		<dynamic prepend="SET">
+			<isNotEmpty prepend="," property="pro_name">
+				PRO_NAME 		= #pro_name#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="pro_cont">
+				PRO_CONT 		= #pro_cont#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="pro_begin_date">
+				PRO_BEGIN_DATE 	= #pro_begin_date#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="pro_end_date">
+				PRO_END_DATE 	= #pro_end_date#
+			</isNotEmpty>
+		</dynamic>
+		WHERE PRO_CODE 	= #pro_code#
+	</update>	
+	
+	<!-- 프로젝트 삭제 -->
+	<update id="deleteProInfo" parameterClass="proInfoVO">
+		UPDATE PRO_INFO 
+			SET PRO_STATUS = 'Y'
+		WHERE PRO_CODE 	= #pro_code#
+	</update>	
+	
+	<!-- 프로젝트 워크스페이스 만들기위한 셀렉트 은혜추가 -->
+	<select id="forProlink" parameterClass="map" resultClass="proInfoVO">
+		<include refid="selectAll"/>
+		WHERE PRO_CODE = #pro_code#
+	</select>
+	
+	<!-- 은혜추가 -->
+	<select id="byProlink" parameterClass="map" resultClass="proInfoVO">
+		<include refid="selectAll"/>
+		WHERE PRO_LINK = #pro_link#
+	</select>
+</sqlMap>

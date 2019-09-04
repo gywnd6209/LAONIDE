@@ -1,0 +1,126 @@
+.cm-s-sublime-text.CodeMirror {
+    background-color: #222;
+    color: #fff;
+}
+
+.cm-s-sublime-text.CodeMirror div.CodeMirror-cursor {
+    border-left: 1px solid #f8f8f0;
+    z-index: 3;
+}
+
+.cm-s-sublime-text .CodeMirror-selected {
+    background: #898989;
+    opacity: .23;
+}
+
+.cm-s-sublime-text .cm-keyword {
+    color: #ff007f;
+}
+
+.cm-s-sublime-text .cm-atom {
+    color: #c48cff;
+}
+
+.cm-s-sublime-text .cm-number {
+    color: #c48cff;
+}
+
+.cm-s-sublime-text .cm-def {
+    color: #fd963f;
+}
+
+.cm-s-sublime-text .cm-variable {
+    color: #fff;
+}
+
+.cm-s-sublime-text .cm-variable-2 {
+    color: #c48cff;
+}
+
+.cm-s-sublime-text .cm-property {
+    color: #52e3f6;
+}
+
+.cm-s-sublime-text .cm-operator {
+    color: #ff007f;
+}
+
+.cm-s-sublime-text .cm-comment {
+    color: #8c8c8c;
+}
+
+.cm-s-sublime-text .cm-string {
+    color: #ece47e;
+}
+
+.cm-s-sublime-text .cm-string-2 {
+    color: #ece47e;
+}
+
+.cm-s-sublime-text .cm-meta {
+    color: #a7ec21;
+}
+
+.cm-s-sublime-text .cm-qualifier {
+    color: #a7ec21;
+}
+
+.cm-s-sublime-text .cm-bracket {
+    color: #f9faf4;
+}
+
+.cm-s-sublime-text .cm-tag {
+    color: #ff007f;
+}
+
+.cm-s-sublime-text .cm-attribute {
+    color: #a7ec21;
+}
+
+.cm-s-sublime-text .cm-matchhighlight {
+    background-color: #00CCFF;
+    color: #242424;
+}
+
+.cm-s-sublime-text div.CodeMirror span.CodeMirror-matchingbracket {
+    color: #a7ec21;
+    font-weight: bold;
+}
+
+.cm-s-sublime-text div.CodeMirror span.CodeMirror-searching {
+    outline: 1px solid #fff;
+    color: black;
+}
+
+.cm-s-sublime-text div.CodeMirror span.cm-matchhighlight.CodeMirror-searching.CodeMirror-selectedtext {
+    background-color: #ffe69d;
+    color: #242424;
+}
+
+.cm-s-sublime-text.CodeMirror pre {
+    /*padding between line number & content*/
+    padding: 0 2px;
+}
+
+.cm-s-sublime-text.CodeMirror .CodeMirror-gutters {
+    border-color: #303030;
+    background: #303030;
+}
+
+.cm-s-sublime-text.CodeMirror .CodeMirror-linenumbers {
+    background-color: #303030;
+}
+
+/* .cm-s-sublime-text.CodeMirror .CodeMirror-linebackground {
+	outline: 1px solid #494949;
+	z-index: 3;
+} */
+
+/* .cm-s-sublime-text.CodeMirror .CodeMirror-activeline, 
+.cm-s-sublime-text.CodeMirror.CodeMirror-focused .CodeMirror-activeline .CodeMirror-gutter-elt {
+	background: rgba(255, 255, 255, .1);
+}*/
+
+.cm-s-sublime-text .CodeMirror-activeline-background {
+    background: #494949;
+}

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+ <sqlMap namespace="issueEndboard">
+ 	<typeAlias alias="issueEndboardVO" type="kr.or.ddit.vo.IssueEndVO"></typeAlias>
+ 	
+ 	<resultMap class="issueEndboardVO" id="issueEndboardMap">
+ 		<result property="isu_end_no" 		column="isu_end_no"/>
+		<result property="isu_no" 			column="isu_no"/>
+		<result property="isu_end_cont" 	column="isu_end_cont"/>
+		<result property="isu_end_writer" 	column="isu_end_writer"/>
+		<result property="isu_end_del_ok" 	column="isu_end_del_ok"/>
+		<result property="isu_end_ok" 		column="isu_end_ok"/>
+		<result property="isu_end_reg_date" column="isu_end_reg_date"/>
+ 	</resultMap>
+ 	
+ 	<sql id = "selectAll">
+ 		SELECT *
+ 			FROM ISSUE_END_BOARD
+ 		  WHERE ISU_END_DEL_OK = 'N'
+ 	</sql>
+ 	
+ 	<select id="issueEndboardInfo" parameterClass="map" resultMap="issueEndboardMap">
+ 		<include refid="selectAll"/>
+ 		AND ISU_END_NO = #isu_end_no#
+ 		
+ 	</select>
+
+	<select id="issueEndboardList" resultClass="issueEndboardVO" parameterClass="map">
+		SELECT ISU_END_NO,
+			ISU_NO,
+			ISU_END_CONT,
+			ISU_END_WRITER,
+			ISU_END_DEL_OK,
+			ISU_END_OK,
+			ISU_END_REG_DATE,
+			MEM_NICK
+ 			FROM ISSUE_END_BOARD, MEMBER
+ 		    WHERE ISU_END_DEL_OK = 'N'
+            AND ISU_NO = #isu_no#
+            AND MEMBER.MEM_ID = ISSUE_END_BOARD.ISU_END_WRITER
+            order by isu_end_no
+		
+	</select>
+	
+	<insert id="insertIssueEndboard" parameterClass="issueEndboardVO">
+		
+		<selectKey keyProperty="isu_end_no" resultClass="String">
+			SELECT ISSUE_END_SEQ.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO ISSUE_END_BOARD(
+								 ISU_END_NO
+								,ISU_NO
+								,ISU_END_CONT
+								,ISU_END_WRITER
+								,ISU_END_OK
+							)VALUES
+							(
+								 #isu_end_no#
+								,#isu_no#
+								,#isu_end_cont#
+								,#isu_end_writer#
+								,#isu_end_ok#
+							)
+	</insert>
+	
+	<update id="deleteIssueEndboard" parameterClass="map">
+		UPDATE ISSUE_END_BOARD
+		SET ISU_END_DEL_OK = 'Y'
+		WHERE ISU_END_NO = #isu_end_no#
+	</update>
+
+	<update id="updateIssueEndboard" parameterClass="issueEndboardVO">
+		UPDATE ISSUE_END_BOARD 
+		set ISU_END_CONT = #isu_end_cont#
+		<isNotEmpty property="isu_end_writer">
+			,isu_end_writer 	= #isu_end_writer#
+		</isNotEmpty>
+		where isu_end_no 		= #isu_end_no#
+	</update>
+	
+ </sqlMap>
+ 
+ 

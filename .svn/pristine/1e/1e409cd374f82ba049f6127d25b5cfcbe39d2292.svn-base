@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+ <sqlMap namespace="ideworkspace">
+ 	<typeAlias alias="IDEWorkspaceVO" type="kr.or.ddit.vo.IDEWorkspaceVO"></typeAlias>
+ 	
+	<insert id="createWS" parameterClass="IDEWorkspaceVO">
+		INSERT INTO IDE_WORKSPACE
+		VALUES (IDE_WORKSPACE_SEQ.NEXTVAL, #folder_path#, #folder_name#, #pro_code#)
+	</insert>
+	
+	<select id="selectWSInfo" parameterClass="map" resultClass="IDEWorkspaceVO">
+		SELECT * FROM IDE_WORKSPACE WHERE PRO_CODE = #pro_code#
+	</select>
+	
+	<select id="isExistWS" parameterClass="map" resultClass="IDEWorkspaceVO">
+		SELECT * FROM IDE_WORKSPACE WHERE FOLDER_NAME = #folder_name#
+	</select>
+	
+	
+ 	
+ </sqlMap>

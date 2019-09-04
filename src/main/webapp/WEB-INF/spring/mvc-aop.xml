@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd">
+
+	<aop:config>
+		<aop:pointcut id="theWholeMethodPC" expression="execution(* kr.or.ddit..*.*(..))"/>
+		<aop:aspect  ref="logPrintAspect">
+			<aop:before pointcut-ref="theWholeMethodPC" method="theWholeJoinpointCallBefore"/>
+			<aop:after 	pointcut-ref="theWholeMethodPC" method="theWholeJoinpointCallAfter"/>
+			<aop:after-throwing	pointcut-ref="theWholeMethodPC" method="theWholeJoinpointCallThrowing"
+								throwing="ex"/>
+			<aop:around	pointcut-ref="theWholeMethodPC" method="theWholeJoinpointCallAround"/>
+		</aop:aspect>
+	</aop:config>
+</beans>

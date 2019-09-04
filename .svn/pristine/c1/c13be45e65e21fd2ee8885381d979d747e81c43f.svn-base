@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+ <sqlMap namespace="alramboard">
+ 	<typeAlias alias="AlramboardVO" type="kr.or.ddit.vo.AlramBoardVO"></typeAlias>
+
+ 	<sql id = "selectAll">
+ 		SELECT *
+ 			FROM ALRAM_BOARD
+ 	</sql>
+ 	
+ 	
+ 	<select id="alramboardList" resultClass="AlramboardVO" parameterClass="map" >
+ 		SELECT B.*
+		FROM (SELECT ROWNUM RNUM, A.*
+				FROM (	<include refid="selectAll"/>
+				 		WHERE PRO_CODE = #pro_code#
+				 		ORDER BY ALRAM_NO) A ) B
+		<![CDATA[ 
+		WHERE B.RNUM <= #startCount#
+		  AND B.RNUM >= #endCount#
+		]]>
+		ORDER BY RNUM
+ 	</select>
+	
+	<!-- 
+		실행될 때 마다 받아야 하는 것
+		alram_content = 들어가는 이슈, 결함, 게시판 제목
+		PRO_CODE
+		MEM_ID
+		BO_WRITER
+		alram_code : ISSUE, ERROR, BOARD
+		pri_code : 우선순위
+	-->
+	<insert id="insertAlramboard" parameterClass="AlramboardVO">
+		<selectKey keyProperty="alram_no" resultClass="String">
+			SELECT ALRAMBOARD_SEQ.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO ALRAM_BOARD(
+								 ALRAM_NO
+							    ,ALRAM_CONTENT
+							    ,ALRAM_DATE
+							    ,PRO_CODE
+							    ,MEM_ID
+							    ,ALRAM_CODE
+							    ,PRI_CODE
+							    ,BO_WRITER
+							    ,BO_NO
+							)VALUES
+							(
+								#alram_no#
+							    ,#alram_content#
+							    ,sysdate
+							    ,#pro_code#
+							    ,#mem_id#
+							    ,#alram_code#
+							    ,#pri_code#
+							    ,#bo_writer#
+							    ,#bo_no#
+							)
+	</insert>
+	
+	<select id="totalAlramboardCount" parameterClass="map" resultClass="int">
+		SELECT COUNT(ALRAM_NO) 
+		FROM ALRAM_BOARD
+		WHERE PRO_CODE 		= #pro_code#
+	</select>
+	
+ </sqlMap>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

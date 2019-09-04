@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap     
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="crewInfo">
+	<typeAlias alias="crewInfoVO" type="kr.or.ddit.vo.CrewInfoVO"></typeAlias>
+	<resultMap id="crewInfoMap" 			class="crewInfoVO">
+		<result property="crew_no" 			column="crew_no"/>
+		<result property="team_join_date" 	column="team_join_date"/>
+		<result property="grand_code" 		column="grand_code"/>
+		<result property="mem_id" 			column="mem_id"/>
+		<result property="pro_code" 		column="pro_code"/>
+	</resultMap>
+	
+	
+	<sql id="selectAll">
+		SELECT *
+		FROM CREW_INFO
+	</sql>
+	
+	<select id="crewInfoInfo" parameterClass="map" resultMap="crewInfoMap">
+		<include refid="selectAll"/>
+		AND CREW_NO = #crew_no#
+	</select>
+	
+	<insert id="insertCrewInfo" parameterClass="crewInfoVO">
+		<selectKey keyProperty="crew_no" resultClass="string">
+			SELECT CREW_INFO_SEQ.NEXTVAL
+				FROM DUAL
+		</selectKey>
+		INSERT INTO CREW_INFO	(crew_no
+								,team_join_date
+								,grand_code
+								,mem_id
+								,pro_code
+								)
+						VALUES( #crew_no#
+								,sysdate
+								,#grand_code#
+								,#mem_id#
+								,#pro_code#
+								)
+	
+	</insert>
+	
+	<!-- 해당 프로젝트에 대한 팀원 정보 출력하기(프로젝트 팀원 목록)  -->
+	<statement id="crewProInfo" resultClass="crewInfoVO">
+		SELECT B.MEM_ID as MEM_ID, B.MEM_NICK as MEM_NICK, A.GRAND_CODE as GRAND_CODE,
+			   A.PRO_CODE as PRO_CODE, A.TEAM_JOIN_DATE as TEAM_JOIN_DATE, C.PRO_LINK as PRO_LINK 
+			FROM CREW_INFO A, MEMBER B, PRO_INFO C
+		  		WHERE A.PRO_CODE 	= #pro_code#
+		    	  AND A.MEM_ID 		= B.MEM_ID
+		    	  AND A.PRO_CODE 	= C.PRO_CODE
+		    	ORDER BY A.MEM_ID
+	</statement>
+	
+	<update id="upPL" parameterClass="crewInfoVO">
+		UPDATE CREW_INFO
+		    SET  GRAND_CODE = 'PL'
+		    WHERE PRO_CODE 	= #pro_code#
+		       AND MEM_ID 	= #mem_id#
+	</update>
+	
+	<update id="nonePL" parameterClass="crewInfoVO">
+		UPDATE CREW_INFO
+    		SET GRAND_CODE  = '미정'
+	       	WHERE PRO_CODE 	= #pro_code#
+	          AND MEM_ID NOT IN(#mem_id#)
+          	  AND GRAND_CODE = 'PL'
+	</update>
+	
+	<delete id="deleteCrew" parameterClass="crewInfoVO">
+		DELETE FROM CREW_INFO
+			WHERE MEM_ID 	= #mem_id#
+			  AND PRO_CODE 	= #pro_code#
+	</delete>
+	
+	<delete id="deleteCrewAll" parameterClass="crewInfoVO">
+		DELETE FROM CREW_INFO
+			WHERE PRO_CODE 	= #pro_code#
+	</delete>
+	
+	<select id="notInLoginID" parameterClass="map" resultClass="crewInfoVO">
+		SELECT CREW_INFO.MEM_ID, MEMBER.MEM_NICK, PRO_INFO.PRO_NAME
+		FROM CREW_INFO, MEMBER, PRO_INFO
+		WHERE CREW_INFO.MEM_ID NOT IN (#mem_id#)
+		AND CREW_INFO.PRO_CODE = #pro_code#
+		AND MEMBER.MEM_ID = CREW_INFO.MEM_ID
+		AND PRO_INFO.PRO_CODE = CREW_INFO.PRO_CODE
+	</select>
+	
+	<insert id="inviteCrew" parameterClass="crewInfoVO">
+		INSERT INTO CREW_INFO(CREW_NO
+							 ,TEAM_JOIN_DATE
+							 ,GRAND_CODE
+							 ,MEM_ID
+							 ,PRO_CODE)
+                	   		(SELECT CREW_INFO_SEQ.NEXTVAL
+            						,sysdate
+            						,'미정'
+            						,#mem_id#
+            						,(SELECT DISTINCT(A.PRO_CODE)
+                							FROM CREW_INFO A, PRO_INFO B     
+							                WHERE A.PRO_CODE = B.PRO_CODE
+							                  AND B.PRO_LINK = #pro_link#)    
+             					  FROM DUAL     
+          						WHERE NOT EXISTS(SELECT pro_code, MEM_ID FROM CREW_INFO 
+                               						WHERE MEM_ID = #mem_id#
+				                                 	  AND pro_code = (SELECT DISTINCT(A.PRO_CODE)
+                                                                        FROM CREW_INFO A, PRO_INFO B     
+                                                                        WHERE A.PRO_CODE = B.PRO_CODE
+                                                                          AND B.PRO_LINK = #pro_link#)
+                                                  )
+                             )              	   
+	</insert>
+	
+	<select id="crewListByProLink"  parameterClass="map" resultClass="crewInfoVO">
+		SELECT CREW_INFO.MEM_ID
+		FROM CREW_INFO, (SELECT PRO_CODE FROM PRO_INFO WHERE PRO_LINK = #pro_link#) A
+		WHERE A.PRO_CODE = CREW_INFO.PRO_CODE
+	</select>
+	
+	<update id="crewUpdateGrade" parameterClass="crewInfoVO">
+		UPDATE CREW_INFO 
+		   SET GRAND_CODE  = #grand_code#
+		 	WHERE MEM_ID   = #mem_id#
+		  	  AND PRO_CODE = #pro_code#
+	</update>
+	
+</sqlMap>

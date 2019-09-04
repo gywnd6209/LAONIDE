@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+ <sqlMap namespace="obi">
+ 	<typeAlias alias="aierrVO" type="kr.or.ddit.vo.AIErrVO"></typeAlias>
+ 	<typeAlias alias="errboardVO" type="kr.or.ddit.vo.ErrboardVO"></typeAlias>
+ 	
+ 	<resultMap class="aierrVO" id="aierrMap">
+ 		<result property="err_code" 	column="err_code"/>
+		<result property="err_name" 	column="err_name"/>
+		<result property="err_sol" 		column="err_sol"/>
+		<result property="admin_id" 	column="admin_id"/>
+ 	</resultMap>
+ 	
+ 	<sql id = "selectAll">
+ 		SELECT *
+ 			FROM AI_ERR
+ 	</sql>
+ 	
+ 	<select id="findErrSol" parameterClass="map" resultClass="aierrVO">
+ 		<include refid="selectAll"/>
+    		WHERE ERR_NAME LIKE '%'|| #err_name# ||'%'
+ 	</select>
+ 	  
+ 	<insert id="insErr" parameterClass="errboardVO">
+ 		<selectKey keyProperty="err_no" resultClass="string"> 
+ 			SELECT ERR_BOARD_SEQ.NEXTVAL
+ 				FROM DUAL	
+ 		</selectKey>
+ 		INSERT INTO ERR_BOARD(ERR_NO
+							  ,ERR_TITLE
+							  ,ERR_CONT
+							  ,ERR_WRITER
+							  ,ERR_GOAL_END_DATE
+							  ,PRO_CODE
+							  ,MEM_ID
+							  ,ERR_MANAGER)
+						VALUES( #err_no#
+								,#err_title#
+								,#err_title#
+								,#mem_nick#
+								,to_date(sysdate, 'YYYY-MM-DD')
+								,#pro_code#
+								,#mem_id#
+								,'미정')
+ 	</insert>  
+ 	  
+ </sqlMap>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

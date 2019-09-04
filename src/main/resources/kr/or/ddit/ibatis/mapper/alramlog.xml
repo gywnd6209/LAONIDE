@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+ <sqlMap namespace="alramlog">
+ 	<typeAlias alias="AlramlogVO" type="kr.or.ddit.vo.AlramLogVO"></typeAlias>
+ 	
+ 	<sql id = "selectAll">
+ 		SELECT *
+ 			FROM ALRAM_LOG
+ 			WHERE OK_STATUS = 'N'
+ 	</sql>
+ 	
+ 	<!-- 현재 세션의 아이디에 맞는 알람에 들어갈 내용 띄우기 -->
+	<select id="alramNotOkList" resultClass="AlramlogVO" parameterClass="map">
+		SELECT ALRAM_BOARD.ALRAM_NO as ALRAM_NO
+				,ALRAM_CONTENT
+				,TO_CHAR(ALRAM_DATE ,'YYYY-MM-DD HH24:MI:SS') AS ALRAM_DATE
+				,ALRAM_BOARD.PRO_CODE
+				,MEM_ID
+				,ALRAM_CODE
+				,PRI_CODE 
+				,BO_WRITER
+				,PRO_INFO.PRO_NAME as PRO_NAME
+				,ALOG_NO
+				,ALRAM_BOARD.BO_NO
+		FROM ALRAM_BOARD, (SELECT ALRAM_NO,ALOG_NO
+			                  FROM ALRAM_LOG 
+			                  WHERE OK_STATUS = 'N' 
+			                  AND MEM_ID = #mem_id#) A,  PRO_INFO
+		WHERE ALRAM_BOARD.ALRAM_NO = A.ALRAM_NO
+		AND PRO_INFO.PRO_CODE = ALRAM_BOARD.PRO_CODE
+		ORDER BY ALRAM_DATE DESC
+	</select>
+	
+<!-- SELECT B.* -->
+<!-- 		FROM (SELECT ROWNUM RNUM, A.* -->
+<!-- 				FROM (	 -->
+                
+<!--                 SELECT * FROM PRO_BOARD -->
+<!--                         WHERE BO_STATUS = 'Y' -->
+<!--                         AND PRO_CODE = '1' -->
+<!--                         AND bo_seq = '0' -->
+<!--                          and (bo_title like '%프%' -->
+<!--                               or bo_cont like '%가%' -->
+<!--                               or bo_writer like '%알%' ) -->
+                         
+<!--                               ORDER BY bo_no) A  ) B -->
+<!--         WHERE B.RNUM <= '10' -->
+<!-- 		  AND B.RNUM >= '1' -->
+<!-- 		ORDER BY RNUM DESC;   -->
+
+	<!-- 필요한 값 : mem_id, alram_no, pro_code -->
+	<insert id="insertAlramLog" parameterClass="map">
+		INSERT INTO ALRAM_LOG ( ALOG_NO, MEM_ID, ALRAM_NO )
+		SELECT ALRAMLOG_SEQ.NEXTVAL, MEM_ID, #alram_no# 
+			FROM (SELECT MEM_ID FROM CREW_INFO
+			                    WHERE PRO_CODE = #pro_code#
+			                    AND NOT MEM_ID IN (#mem_id#))
+	</insert>
+	
+	<update id="deleteAlramLog" parameterClass="map">
+		UPDATE ALRAM_LOG 
+		SET OK_STATUS = 'Y'
+		WHERE ALOG_NO = #alog_no#
+	</update>
+
+	
+ </sqlMap>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

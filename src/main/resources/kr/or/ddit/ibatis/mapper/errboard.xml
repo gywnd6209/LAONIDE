@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+ <sqlMap namespace="errboard">
+ 	<typeAlias alias="errboardVO" type="kr.or.ddit.vo.ErrboardVO"></typeAlias>
+ 	
+ 	<resultMap class="errboardVO" id="issueboardMap">
+ 		<result property="err_no" 				column="err_no"/>
+		<result property="err_title" 			column="err_title"/>
+		<result property="err_cont" 			column="err_cont"/>
+		<result property="err_writer" 			column="err_writer"/>
+		<result property="err_reg_date" 		column="err_reg_date"/>
+		<result property="err_goal_end_date" 	column="err_goal_end_date"/>
+		<result property="err_rank" 			column="err_rank"/>
+		<result property="err_end_ok" 			column="err_end_ok"/>
+		<result property="err_del_ok" 			column="err_del_ok"/>
+		<result property="pro_code" 			column="pro_code"/>
+		<result property="mem_id" 				column="mem_id"/>
+ 	</resultMap>
+ 	
+ 	<resultMap class="errboardVO" id="errboardMap">
+ 		<result property="err_no" 				column="err_no"/>
+		<result property="err_title" 			column="err_title"/>
+		<result property="err_cont" 			column="err_cont"/>
+		<result property="err_writer" 			column="err_writer"/>
+		<result property="err_reg_date" 		column="err_reg_date"/>
+		<result property="err_goal_end_date" 	column="err_goal_end_date"/>
+		<result property="err_rank" 			column="err_rank"/>
+		<result property="err_end_ok" 			column="err_end_ok"/>
+		<result property="err_del_ok" 			column="err_del_ok"/>
+		<result property="pro_code" 			column="pro_code"/>
+		<result property="mem_id" 				column="mem_id"/>
+		<result property="err_manager" 			column="err_manager"/>
+ 	</resultMap>
+ 	
+ 	<sql id = "selectAll">
+ 		SELECT *
+ 			FROM ERR_BOARD
+ 		  WHERE PRO_CODE = #pro_code#
+ 	</sql>
+ 	
+ 	<sql id = "selectAll1">
+ 		SELECT *
+ 			FROM ERR_BOARD
+ 		  WHERE PRO_CODE = #pro_code# AND ERR_DEL_OK = 'N'
+ 	</sql>
+ 	
+ 	<sql id="searchCondition">
+ 		<dynamic prepend="AND">
+			<isNotEmpty property="search_keyword" open="(" close=")"> 
+				<isEqual property="search_keycode" compareValue="TOTAL">
+						BO_TITLE 	LIKE '%'||#search_keyword#||'%'
+				  OR 	BO_CONT  LIKE '%'||#search_keyword#||'%'
+				  OR 	BO_WRITER 	LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="TITLE">
+						BO_TITLE LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="CONTENT">
+						BO_CONT LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="WRITER">
+						BO_WRITER LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+			</isNotEmpty>
+ 		</dynamic>
+ 	</sql>
+ 	
+ 	<sql id="searchCondition1">
+ 		<dynamic prepend="AND">
+			<isNotEmpty property="search_keyword" open="(" close=")"> 
+				<isEqual property="search_keycode" compareValue="TOTAL">
+						ERR_TITLE 	LIKE '%'||#search_keyword#||'%'
+				  OR 	ERR_RANK    LIKE '%'||#search_keyword#||'%'
+				  OR 	ERR_WRITER 	LIKE '%'||#search_keyword#||'%'
+				  OR 	ERR_END_OK 	LIKE '%'||#search_keyword#||'%'
+				  OR 	ERR_MANAGER LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="TITLE">
+						ERR_TITLE LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="WRITER">
+						ERR_WRITER LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="PRIORITY">
+						ERR_RANK LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="COMPLETED">
+						ERR_END_OK LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="MANAGER">
+						ERR_MANAGER LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+			</isNotEmpty>
+ 		</dynamic>
+ 	</sql>
+ 	
+ 	<statement id="errList" resultClass="errboardVO">
+	 	SELECT * FROM ERR_BOARD 
+	    WHERE PRO_CODE = #pro_code#
+	        AND ERR_DEL_OK = 'N'
+	        <![CDATA[
+	        AND ROWNUM <=5
+	        ]]>  
+	      ORDER BY ERR_NO DESC
+ 	</statement>
+ 	  
+ 	<select id="errboardInfo" parameterClass="map" resultMap="errboardMap">
+ 		<include refid="selectAll1"/>
+ 		AND ERR_NO = #err_no#
+ 		
+ 	</select>
+
+	<select id="errboardList" resultClass="errboardVO" parameterClass="map">
+		SELECT B.*
+		FROM (SELECT ROWNUM RNUM, A.*
+				FROM (	<include refid="selectAll1"/>
+				 		AND PRO_CODE = #pro_code#
+				 		<include refid="searchCondition1"/>
+			        	ORDER BY ERR_NO) A ) B
+		<![CDATA[ 
+		WHERE B.RNUM <= #startCount#
+		  AND B.RNUM >= #endCount#
+		]]>
+		ORDER BY RNUM DESC
+	</select>
+	
+	<insert id="insertErrboard" parameterClass="errboardVO">
+		
+		<selectKey keyProperty="err_no" resultClass="String">
+			SELECT ERR_BOARD_SEQ.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO ERR_BOARD(
+								 ERR_NO
+								,ERR_TITLE
+								,ERR_CONT
+								,ERR_WRITER
+								,ERR_GOAL_END_DATE
+								,ERR_RANK
+								,PRO_CODE
+								,MEM_ID
+								,ERR_MANAGER
+							)VALUES
+							(
+								 #err_no#
+								,#err_title#
+								,#err_cont#
+								,#err_writer#
+								,to_date(#err_goal_end_date#, 'YYYY-MM-DD')
+								,#err_rank#
+								,#pro_code#
+								,#mem_id#
+								,#err_manager#
+							)
+	</insert>
+	
+	<update id="deleteErrboard" parameterClass="map">
+		UPDATE ERR_BOARD
+		SET ERR_DEL_OK = 'Y'
+		WHERE ERR_NO = #err_no#
+	</update>
+
+	<update id="updateErrboard" parameterClass="errboardVO">
+		UPDATE ERR_BOARD 
+		set ERR_TITLE 		= #err_title#
+		<isNotEmpty property="err_writer">
+			,err_writer 	= #err_writer#
+		</isNotEmpty>
+		<isNotEmpty property="err_cont">
+			,err_cont 	= #err_cont#
+		</isNotEmpty>
+		<isNotEmpty property="err_reg_date">
+			,err_reg_date 	= sysdate
+		</isNotEmpty>
+		<isNotEmpty property="err_goal_end_date">
+			,err_goal_end_date 	= to_date(#err_goal_end_date#, 'YYYY-MM-DD')
+		</isNotEmpty>
+		<isNotEmpty property="err_rank">
+			,err_rank 	= #err_rank#
+		</isNotEmpty>
+		<isNotEmpty property="err_manager">
+			,err_manager 	= #err_manager#
+		</isNotEmpty>
+		where err_no 		= #err_no#
+	</update>
+
+	<select id="totalErrboardCount" parameterClass="map" resultClass="int">
+		SELECT COUNT(ERR_NO) 
+		FROM ERR_BOARD
+		WHERE ERR_DEL_OK 	= 'N'
+			AND PRO_CODE 	= #pro_code#
+		<include refid="searchCondition1"/>
+	</select>
+	
+	<update id="updateErrboard_end" parameterClass="errboardVO">
+		UPDATE ERR_BOARD
+		set ERR_END_OK = 'Y'
+		WHERE ERR_NO = #err_no#
+	</update>
+	
+	<!-- 스케쥴 추가용 -->
+	<insert id="insertSchedule1" parameterClass="errboardVO" >
+		<selectKey keyProperty="schedule_no" resultClass="String">
+			SELECT SCHEDULE_SEQ.NEXTVAL 
+			FROM DUAL 
+		</selectKey>
+		
+		INSERT INTO SCHEDULE ( 
+								SCHEDULE_NO,
+								TITLE,
+								DESCRIPTION,
+								STARTDATE,
+								ENDDATE,
+								TYPE,
+								USERNAME,
+								BACKGROUNDCOLOR,
+								TEXTCOLOR,
+								ALLDAY,
+								PRO_CODE, 
+								BO_NO
+							) VALUES 
+							(
+								 #schedule_no#
+								,#err_title#
+								,#err_cont#
+								,sysdate
+								,to_date(#err_goal_end_date#, 'yyyy-MM-dd HH24:mi')
+								,'결함'
+								,#mem_id#
+								,'##cc99ff'
+								,'##ffffff'
+								,'false'
+								,#pro_code#
+								,#err_no#
+							)
+							
+	</insert>
+ </sqlMap>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+ <sqlMap namespace="cobi">
+ 	<typeAlias alias="cobiVO" type="kr.or.ddit.vo.AICodeVO"></typeAlias>
+ 	
+ 	<resultMap class="cobiVO" id="cobiMap">
+ 		<result property="user_command" 	column="user_command"/>
+		<result property="sample_code" 	column="sample_code"/>
+		<result property="amdin_id" 		column="amdin_id"/>
+ 	</resultMap>
+ 	
+ 	<sql id = "selectAll">
+ 		SELECT *
+ 			FROM AI_CODE
+ 	</sql>
+ 	
+ 	<select id="cobiInfo" parameterClass="map" resultMap="cobiMap">
+ 		<include refid="selectAll"/>
+ 		WHERE USER_COMMAND = #user_command#
+ 	</select>
+ 	  
+ </sqlMap>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

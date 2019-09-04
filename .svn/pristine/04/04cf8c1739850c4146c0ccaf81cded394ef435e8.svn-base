@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN"
+       "http://tiles.apache.org/dtds/tiles-config_2_1.dtd">
+<tiles-definitions>
+	<!-- 타일즈 설정파일 한 개 이상의 definition이 반드시 선언되어야 함. 
+		 definition은 다른  definition을 상속할 수 있음. 
+	-->
+	<definition name="user/main" template="/WEB-INF/views/user/mainTemplate_1.jsp">
+		<put-attribute name="title" 			value="::: 코딩을 즐겁게! LAON IDE :::"></put-attribute>
+		<put-attribute name="tabmenu" 			value=""></put-attribute>
+	</definition>
+	
+	<definition name="admin/main" template="/WEB-INF/views/admin/mainTemplate_1.jsp">
+		<put-attribute name="title" 			value="::: 코딩을 즐겁게! LAON IDE :::"></put-attribute>
+		<put-attribute name="tabmenu" 			value=""></put-attribute>
+	</definition>
+	
+	<!-- member-->
+<!-- 	<definition name="member/main" template="/WEB-INF/views/member/memberForm"> -->
+<!-- 		<put-attribute name="title" value="::: LAON IDE 에 오신것을 환영합니다 :)"></put-attribute> -->
+<!-- 		<put-attribute name="tabmenu" 			value=""></put-attribute> -->
+<!-- 	</definition> -->
+<!-- 	<definition name="user/main" template="/WEB-INF/views/user/mainTemplate.jsp"> -->
+<!-- 		<put-attribute name="title" 			value="::: 코딩을 즐겁게! LAON IDE :::"></put-attribute> -->
+<!-- 		<put-attribute name="header" 			value="/WEB-INF/views/user/layout/header.jsp"></put-attribute> -->
+<!-- 		<put-attribute name="footer" 			value="/WEB-INF/views/user/layout/footer.jsp"></put-attribute> -->
+<!-- 		<put-attribute name="tabmenu" 			value=""></put-attribute> -->
+<!-- 	</definition> -->
+<!-- 		<put-attribute name="left" 				value="/WEB-INF/views/user/layout/left.jsp"></put-attribute> -->
+	<!-- 
+		액션클래스.process(request, response){
+			return "/user/freeboard/freeboardList.tiles";
+			return "/user/freeboard/freeboardView.tiles";
+			return "/user/freeboard/freeboardForm.tiles";
+			return "/user/freeboard/freeboardReplyForm.tiles";
+			-> freeboard = * = {1} : 첫번째 에스트릭크
+			-> freeboardList~form = * = {2}  => 와일드카드!!!!
+			-> /WEB-INF/views/user/{1}/{2}.jsp
+			
+			member일 경우?
+			return "/user/member/memberList.tiles"; -> /WEB-INF/views/user/{1}/{2}.jsp
+			
+			모두 와일드카드일경우..? 할 수는 있는데 어드민도 해야되니까 ㅠ
+		}
+	 -->
+	
+	
+<!-- 	<definition name="user/issuetracker/board/*" extends="user/main"> -->
+<!-- 		<put-attribute name="tabmenu" 			value="/WEB-INF/views/user/issuetracker/tabmenu.jsp"></put-attribute> -->
+<!-- 		<put-attribute name="content" 			value="/WEB-INF/views/user/issuetracker/board/{1}.jsp"></put-attribute> -->
+<!-- 	</definition> -->
+	
+	<definition name="user/issuetracker/*" extends="user/main">
+		<put-attribute name="tabmenu" 			value="/WEB-INF/views/user/issuetracker/tabmenu.jsp"></put-attribute>
+		<put-attribute name="content" 			value="/WEB-INF/views/user/issuetracker/{1}.jsp"></put-attribute>
+	</definition>
+	
+	<definition name="user/issuetracker/*/*" extends="user/main">
+		<put-attribute name="tabmenu" 			value="/WEB-INF/views/user/issuetracker/tabmenu.jsp"></put-attribute>
+		<put-attribute name="content" 			value="/WEB-INF/views/user/issuetracker/{1}/{2}.jsp"></put-attribute>
+	</definition>
+	
+	<!-- 상속할 수 있도록 만들기 -->
+	<definition name="user/*/*" extends="user/main">
+		<put-attribute name="content" value="/WEB-INF/views/user/{1}/{2}.jsp"></put-attribute>
+	</definition>
+	
+	<!-- 상속할 수 있도록 만들기2 효중-->
+	<definition name="user/*/*/*" extends="user/main">
+		<put-attribute name="content" value="/WEB-INF/views/user/{1}/{2}/{3}.jsp"></put-attribute>
+	</definition>
+	
+	<!-- member -->
+<!-- 	<definition name="member/*/*" extends="member/main"> -->
+<!-- 		<put-attribute name="content" value="/WEB-INF/views/member/{1}/{2}.jsp"></put-attribute> -->
+<!-- 	</definition> -->
+<!-- 	<definition name="member/*/*/*" extends="member/main"> -->
+<!-- 		<put-attribute name="content" value="/WEB-INF/views/member/{1}/{2}/{3}.jsp"></put-attribute> -->
+<!-- 	</definition> -->
+	
+	<!-- 팀원모집 팝업 -->
+    <definition name="user/recruitboard/createTeam" template="/WEB-INF/views/user/recruitboard/createTeam.jsp">
+		<put-attribute name="title" 	value="::: 코딩을 즐겁게! LAON IDE 팀 구성::: "></put-attribute>
+	</definition>
+	
+	<!-- 팀원변경 팝업 -->
+    <definition name="user/issuetracker/crew/crewChange" template="/WEB-INF/views/user/issuetracker/crew/crewChange.jsp">
+		<put-attribute name="title" 	value="굿바이~"></put-attribute>
+	</definition>
+	
+	<!-- 팀장 위임 팝업 -->
+    <definition name="user/issuetracker/crew/crewPLChange" template="/WEB-INF/views/user/issuetracker/crew/crewPLChange.jsp">
+		<put-attribute name="title" 	value="::: 코딩을 즐겁게! LAON IDE:::"></put-attribute>
+	</definition>
+	
+	<!-- 초대 팝업 -->
+    <definition name="user/issuetracker/crew/popLink" template="/WEB-INF/views/user/issuetracker/crew/popLink.jsp">
+		<put-attribute name="title" 	value="::: 코딩을 즐겁게! LAON IDE:::"></put-attribute>
+	</definition>
+	
+	<!-- IDE 파일생성 팝업 -->
+    <definition name="lionide/createFile" template="/WEB-INF/views/lionide/createFile.jsp">
+		<put-attribute name="title" 	value="::: 코딩을 즐겁게! LAON IDE 파일 생성::: "></put-attribute>
+	</definition>
+	
+	<!-- 에러해결책 팝업 -->
+    <definition name="laonide/findErrSol" template="/WEB-INF/views/laonide/findErrSol.jsp">
+		<put-attribute name="title" 	value="::: 코딩을 즐겁게! LAON IDE:::"></put-attribute>
+	</definition>
+	
+	<!-- 회원정보 팝업 -->
+	<definition name="user/member/memberProfile" template="/WEB-INF/views/user/member/memberProfile.jsp">
+		<put-attribute name="title" value="::: LAON IDE ::: 회원정보"></put-attribute>
+	</definition>
+
+	<!-- 이슈트래커 프로젝트 생성 팝업-->
+	<definition name="user/project/projectForm" template="/WEB-INF/views/user/project/projectForm.jsp">
+		<put-attribute name="title" value="::: LAON IDE ::: 프로젝트 생성"></put-attribute>
+	</definition>
+	
+    <!-- 팀장 위임 팝업 -->
+    <definition name="user/issuetracker/crew/crewUpdate" template="/WEB-INF/views/user/issuetracker/crew/crewUpdate.jsp">
+		<put-attribute name="title" 	value="::: LAON IDE ::: 직책 설정하기"></put-attribute>
+	</definition>
+	
+<!-- 	http://localhost/user/issuetracker/issueMain.do -->
+
+	<definition name="admin/*/*" extends="admin/main">
+		<put-attribute name="content" value="/WEB-INF/views/admin/{1}/{2}.jsp"></put-attribute>
+	</definition>
+
+<!-- 	<definition name="file/fileUpload" template="/WEB-INF/views/file/fileUploadForm.jsp"> -->
+<!-- 	</definition> -->
+</tiles-definitions>

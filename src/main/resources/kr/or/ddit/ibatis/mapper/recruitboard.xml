@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap     
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="recruitboard">
+	
+	<typeAlias alias="recruitboardVO" type="kr.or.ddit.vo.RecruitBoardVO"></typeAlias>
+	
+	<resultMap id="recruitboardMap" class="recruitboardVO">
+		<result property="bo_no" column="bo_no"/>
+		<result property="bo_title" column="bo_title"/>
+		<result property="bo_content" column="bo_content"/>
+		<result property="bo_begin_date" column="bo_begin_date"/>
+		<result property="bo_end_date" column="bo_end_date"/>
+		<result property="bo_person" column="bo_person"/>
+		<result property="bo_hit" column="bo_hit"/>
+		<result property="bo_status" column="bo_status"/>
+		<result property="bo_group" column="bo_group"/>
+		<result property="bo_seq" column="bo_seq"/>
+		<result property="bo_depth" column="bo_depth"/>
+		<result property="bo_writer" column="bo_writer"/>
+		<result property="bo_reg_date" column="bo_reg_date"/>
+		<result property="mem_id" column="mem_id"/>
+		<result property="lang_code" column="lang_code"/>
+		<result property="lang_level" column="lang_level"/>
+<!-- 		<result property="items" column="bo_no" select="fileitem.fileItemList"/> -->
+	</resultMap>
+	
+	
+	<sql id="selectAll">
+		SELECT *
+		FROM RECRUIT_BOARD
+		WHERE BO_STATUS = 'n' and BO_SEQ = 0
+	</sql>
+	
+	<sql id="selectReplyAll">
+		SELECT *
+			FROM RECRUIT_BOARD
+			WHERE BO_STATUS = 'n' and BO_GROUP = #bo_no# and BO_SEQ > 0
+	</sql>
+	
+	<sql id="searchCondition">
+		
+		<dynamic prepend="AND">
+		
+			<isNotEmpty property="search_keyword" open="(" close=")">
+				<isEqual property="search_keycode" compareValue="TOTAL">
+					BO_TITLE LIKE '%'||#search_keyword#||'%'
+				 OR BO_WRITER LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="TITLE">
+					BO_TITLE LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="NICK">
+					BO_WRITER LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="ID">
+					MEM_ID LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+			</isNotEmpty>
+			
+			<isNotEmpty property="search_keyword" >
+			and bo_status='n'
+			</isNotEmpty>
+		</dynamic>	
+	</sql>
+	
+	<select id="recruitboardInfo" parameterClass="map" resultMap="recruitboardMap">
+		<include refid="selectAll"/>
+		AND BO_NO = #bo_no#
+	</select>
+	
+	
+	<select id="recruitboardList" parameterClass="map" resultClass="recruitboardVO">
+	
+	select B.*
+		FROM (SELECT rownum rnum, A.*
+			FROM (<include refid="selectAll"/>
+				<include refid="searchCondition"/>
+	    			ORDER BY BO_GROUP, BO_SEQ DESC) A) B
+		    <![CDATA[
+	 	   	WHERE B.RNUM <= #startCount# 
+	 	   		AND B.RNUM >= #endCount# 
+	 	   	]]> 
+		ORDER BY rnum desc
+	
+	</select>
+	
+	<insert id="insertRecruitboard" parameterClass="recruitboardVO">
+		<selectKey keyProperty="bo_no" resultClass="string">
+			SELECT RECRUIT_BOARD_SEQ.NEXTVAL
+				FROM DUAL
+		</selectKey>
+		INSERT INTO RECRUIT_BOARD(BO_NO
+								,BO_TITLE
+								,BO_WRITER
+								,MEM_ID
+								,LANG_CODE
+								,LANG_LEVEL
+								,BO_CONTENT
+								,BO_BEGIN_DATE
+								,BO_END_DATE
+								,BO_PERSON
+								,BO_GROUP)
+						VALUES(#bo_no#
+								,#bo_title#
+								,#bo_writer#
+								,#mem_id#
+								,#lang_code#
+								,#lang_level#
+								,#bo_content#
+								,to_date(#bo_begin_date#, 'YYYY-MM-DD')
+								,to_date(#bo_end_date#, 'YYYY-MM-DD')
+								,#bo_person#
+								,#bo_no#)
+	
+	</insert>
+	
+ 	<update id="deleteRecruitboardInfo" parameterClass="map">
+ 		UPDATE RECRUIT_BOARD
+ 			SET BO_STATUS = 'y'
+ 		WHERE BO_NO = #bo_no#
+ 			
+ 			 
+ 	</update>
+	  
+	<update id="updateRecruitboard" parameterClass="recruitboardVO">
+		UPDATE RECRUIT_BOARD
+			SET  BO_TITLE = #bo_title#
+				,BO_CONTENT = #bo_content#
+				,BO_BEGIN_DATE = to_date(#bo_begin_date#, 'YYYY-MM-DD')
+				,BO_END_DATE = to_date(#bo_end_date#, 'YYYY-MM-DD')
+				,BO_PERSON = #bo_person#
+		WHERE BO_NO = #bo_no#
+	</update>
+	
+	<select id="incrementSeq" parameterClass="recruitboardVO" resultClass="String" >
+		SELECT MAX(BO_SEQ)+1
+			FROM RECRUIT_BOARD
+			WHERE BO_GROUP = #bo_group#
+	</select>
+	
+	<update id="updateSeq" parameterClass="recruitboardVO">
+		UPDATE RECRUIT_BOARD
+		  SET BO_SEQ = BO_SEQ + 1
+		WHERE BO_GROUP = #bo_group#
+		<![CDATA[
+		AND BO_SEQ > #bo_seq# 
+ 		]]>
+	</update>
+	
+	<insert id="insertRecruitboardReply" parameterClass="recruitboardVO">
+		<selectKey keyProperty="bo_no" resultClass="string">
+			SELECT RECRUIT_BOARD_SEQ.NEXTVAL
+				FROM DUAL
+		</selectKey>
+		INSERT INTO RECRUIT_BOARD(BO_NO
+								,BO_WRITER
+								,MEM_ID
+								,LANG_CODE
+								,LANG_LEVEL
+								,BO_CONTENT
+								,BO_GROUP
+								,BO_SEQ
+								,BO_DEPTH)
+						VALUES(#bo_no#
+								,#bo_writer#
+								,#mem_id#
+								,#lang_code#
+								,#lang_level#
+								,#bo_content#
+								,#bo_group#
+								,#bo_seq#
+								,#bo_depth#)
+	</insert>
+	
+	<update id="updateRecruitboardReply" parameterClass="recruitboardVO">
+		UPDATE RECRUIT_BOARD
+			SET BO_CONTENT = #bo_content#
+		WHERE BO_NO = #bo_no#
+	</update>
+	
+	<select id="recruitboardReplyList" parameterClass="map" resultClass="recruitboardVO">
+	
+	select B.*
+		FROM (SELECT rownum rnum, A.*
+			FROM (	<include refid="selectReplyAll"/>
+	    			ORDER BY BO_GROUP, BO_SEQ DESC) A) B
+		    <![CDATA[
+	 	   	WHERE B.RNUM <= #startCount# 
+	 	   		AND B.RNUM >= #endCount# 
+	 	   	]]> 
+		ORDER BY rnum desc
+	
+	
+	</select>
+	
+	<select id="totalCount" parameterClass="map" resultClass="int">
+		SELECT COUNT(bo_no)
+			FROM RECRUIT_BOARD
+			WHERE BO_STATUS = 'n' and BO_SEQ = 0
+			<include refid="searchCondition"/>
+	</select>
+	
+	<select id="totalCountReply" parameterClass="map" resultClass="int">
+		SELECT COUNT(bo_no)
+			FROM RECRUIT_BOARD
+			WHERE BO_GROUP = #bo_no# and BO_SEQ > 0 and BO_STATUS = 'n'
+	</select>
+	
+	
+	<update id="updateHit" parameterClass="map">
+		UPDATE RECRUIT_BOARD
+			SET BO_HIT = BO_HIT+1
+    	  WHERE BO_NO = #bo_no#
+	</update>
+	
+	<select id="pro_count" parameterClass="map" resultClass="int">
+		select count(a.pro_code)
+			from crew_info a, (select pro_code
+			                    from pro_info
+			                    where pro_status = 'N') b
+			where a.mem_id = #mem_id# and a.pro_code = b.pro_code
+	</select>
+	
+	<select id="id_nick" parameterClass="String" resultClass="String">
+		SELECT MEM_NICK
+			FROM MEMBER
+			WHERE MEM_ID = #mem_id#
+	</select>
+	
+</sqlMap>

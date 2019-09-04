@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMapConfig      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+<sqlMapConfig>
+	<properties resource="kr/or/ddit/ibatis/config/SqlMapConfig.properties" />
+	<settings cacheModelsEnabled="true" 
+		enhancementEnabled="true"
+		lazyLoadingEnabled="true" 
+		maxRequests="32" 
+		maxSessions="10"
+		maxTransactions="5" 
+		useStatementNamespaces="true" />
+	
+	<!-- 은혜 -->
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/proboard.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/proboardFileitem.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/alramboard.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/alramlog.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/ideworkspace.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/chatlog.xml" />
+	
+	<!-- 은지 -->
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/recruitboard.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/grand.xml" />	
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/proInfo.xml" />	
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/crewInfo.xml" />	
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/issueboard.xml" />	
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/issueEndboard.xml" />	
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/solboard.xml" />	
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/idefile.xml" />	
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/cobi.xml" />
+	<!-- 혜영 -->
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/faqboard.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/libraryboard.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/libraryboardFileitem.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/errboard.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/obi.xml" />
+	<!-- 효중 -->
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/member.xml"/>
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/notice.xml"/>
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/freeboard.xml"/>
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/freeboardFileitem.xml"/>
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/issuehome.xml"/>
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/schedule.xml"/>
+	
+	<!-- 종운 -->
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/qaboard.xml" />
+</sqlMapConfig>
+
+
+
+
+
+

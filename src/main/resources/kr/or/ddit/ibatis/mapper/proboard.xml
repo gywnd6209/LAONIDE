@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+ <sqlMap namespace="proboard">
+ 	<typeAlias alias="proboardVO" type="kr.or.ddit.vo.ProBoardVO"></typeAlias>
+ 	<resultMap class="proboardVO" id="proboardMap">
+ 		<result property="pro_code" column="pro_code"/>
+		<result property="bo_no" column="bo_no"/>
+		<result property="bo_title" column="bo_title"/>
+		<result property="bo_cont" column="bo_cont"/>
+		<result property="bo_writer" column="bo_writer"/>
+		<result property="bo_date" column="bo_date"/>
+		<result property="bo_status" column="bo_status"/>
+		<result property="bo_seq" column="bo_seq"/>
+		<result property="bo_group" column="bo_group"/>
+		<result property="mem_id" column="mem_id"/>
+		<result property="items" column="bo_no" select="proboradFileitem.proFileItemList"/>
+ 	</resultMap>
+ 	<!-- 반복되는 쿼리는 따로 빼놓을 수 있음 -->
+ 	<sql id = "selectAll">
+ 		SELECT *
+ 			FROM PRO_BOARD
+ 			WHERE BO_STATUS = 'N'
+ 	</sql>
+ 	
+ 	<sql id="searchCondition">
+ 		<dynamic prepend="AND" >
+		  	<isNotEmpty property="search_keyword" open="(" close=")">
+		  		<isEqual property="search_keycode" compareValue="TOTAL">
+		  			bo_title like '%'||#search_keyword#||'%'
+		  			or bo_cont like '%'||#search_keyword#||'%'
+		  			or bo_writer like '%'||#search_keyword#||'%'
+		  		</isEqual>
+		  		<isEqual property="search_keycode" compareValue="TITLE">
+		  			bo_title like '%'||#search_keyword#||'%'
+		  		</isEqual>
+		  		<isEqual property="search_keycode" compareValue="CONTENT">
+		  			bo_cont like '%'||#search_keyword#||'%'
+		  		</isEqual>
+		  		<isEqual property="search_keycode" compareValue="WRITER">
+		  			bo_writer like '%'||#search_keyword#||'%'
+		  		</isEqual>
+		  	</isNotEmpty>
+		 </dynamic>
+	</sql>
+ 	
+ 	
+ 	
+ 	<select id="proboardAllList" resultClass="proboardVO" parameterClass="map" >
+ 		<include refid="selectAll"/>
+ 		AND PRO_CODE = #pro_code#
+ 	</select>
+ 	
+ 	<select id="proboardInfo" parameterClass="map" resultMap="proboardMap">
+ 		<include refid="selectAll"/>
+ 		AND BO_NO = #bo_no#
+ 		
+ 	</select>
+
+	<select id="proboardList" resultClass="proboardVO" parameterClass="map">
+		SELECT B.*
+		FROM (SELECT ROWNUM RNUM, A.*
+				FROM (	<include refid="selectAll"/>
+				 		AND PRO_CODE = #pro_code#
+                        AND BO_SEQ = '0'
+				 		<include refid="searchCondition"/>
+			        	ORDER BY BO_NO) A ) B
+		<![CDATA[ 
+		WHERE B.RNUM <= #startCount#
+		  AND B.RNUM >= #endCount#
+		]]>
+		ORDER BY RNUM DESC
+	</select>
+	
+
+
+<!-- SELECT B.* -->
+<!-- 		FROM (SELECT ROWNUM RNUM, A.* -->
+<!-- 				FROM (	 -->
+                
+<!--                 SELECT * FROM PRO_BOARD -->
+<!--                         WHERE BO_STATUS = 'Y' -->
+<!--                         AND PRO_CODE = '1' -->
+<!--                         AND bo_seq = '0' -->
+<!--                          and (bo_title like '%프%' -->
+<!--                               or bo_cont like '%가%' -->
+<!--                               or bo_writer like '%알%' ) -->
+                         
+<!--                               ORDER BY bo_no) A  ) B -->
+<!--         WHERE B.RNUM <= '10' -->
+<!-- 		  AND B.RNUM >= '1' -->
+<!-- 		ORDER BY RNUM DESC;   -->
+
+
+	<insert id="insertProboard" parameterClass="proboardVO">
+		
+		<selectKey keyProperty="bo_no" resultClass="String">
+			SELECT PROBOARD_SEQ.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO PRO_BOARD(
+								 BO_NO
+								,BO_TITLE
+								,BO_CONT
+								,BO_WRITER
+								,BO_STATUS
+								,PRO_CODE
+								,BO_GROUP
+								,BO_SEQ
+								,BO_DATE
+								,MEM_ID
+							)VALUES
+							(
+								 #bo_no#
+								,#bo_title#
+								,#bo_cont#
+								,#bo_writer#
+								,'N'
+								,#pro_code#
+								,#bo_no#
+								,'0'
+								,sysdate
+								,#mem_id#
+							)
+	</insert>
+	
+	<update id="deleteProboard" parameterClass="map">
+		UPDATE PRO_BOARD
+		SET BO_STATUS = 'Y'
+		WHERE BO_NO = #bo_no#
+	</update>
+
+	<update id="updateProboard" parameterClass="ProboardVO">
+		UPDATE PRO_BOARD 
+		set BO_TITLE 		= #bo_title#
+		<isNotEmpty property="bo_writer">
+			,bo_writer 	= #bo_writer#
+		</isNotEmpty>
+		<isNotEmpty property="bo_cont">
+			,bo_cont 	= #bo_cont#
+		</isNotEmpty>
+		where bo_no 		= #bo_no#
+	</update>
+
+	<select id="totalProboardCount" parameterClass="map" resultClass="int">
+		SELECT COUNT(BO_NO) 
+		FROM PRO_BOARD
+		WHERE BO_STATUS 	= 'N'
+		AND BO_SEQ 			= '0'
+		AND PRO_CODE 		= #pro_code#
+		<include refid="searchCondition"/>
+	</select>
+
+	
+	<!-- 댓글 부분 -->
+	<select id="proboardReplyList" parameterClass="map" resultMap="proboardMap">
+ 		<include refid="selectAll"/>
+ 			AND PRO_CODE = #pro_code#
+            AND BO_GROUP = #bo_no#
+            <![CDATA[ 
+            AND BO_SEQ > '0'
+			]]>
+            ORDER BY BO_NO
+ 	</select>
+ 	
+ 	
+	<select id="upProboardSeq" parameterClass="proboardVO" resultClass="String">
+		SELECT 
+			MAX(BO_SEQ) + 1	
+			FROM PRO_BOARD
+			WHERE BO_GROUP = #bo_group#
+	</select>
+
+ 		
+	<insert id="insertProboardReply" parameterClass="proboardVO">
+		<selectKey keyProperty="bo_no" resultClass="String">
+			SELECT PROBOARD_SEQ.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO PRO_BOARD(
+								 BO_NO
+								,BO_CONT
+								,BO_WRITER
+								,BO_STATUS
+								,PRO_CODE
+								,BO_GROUP
+								,BO_SEQ
+								,BO_DATE
+								,MEM_ID
+							)VALUES
+							(
+								 #bo_no#
+								,#bo_cont#
+								,#bo_writer#
+								,'N'
+								,#pro_code#
+								,#bo_group#
+								,#bo_seq#
+								,sysdate
+								,#mem_id#
+							)
+	</insert>
+	
+	<update id="updateProboardReply" parameterClass="ProboardVO">
+		UPDATE PRO_BOARD 
+		set bo_cont 		= #bo_cont#
+		<isNotEmpty property="bo_writer">
+			,bo_writer 	= #bo_writer#
+		</isNotEmpty>
+		<isNotEmpty property="mem_id">
+			,mem_id 	= #mem_id#
+		</isNotEmpty>
+		where bo_no 		= #bo_no#
+	</update>	
+	
+	<!-- 댓글 끝-->
+	
+ </sqlMap>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

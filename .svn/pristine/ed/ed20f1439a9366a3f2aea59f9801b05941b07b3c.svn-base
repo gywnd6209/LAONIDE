@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+ <sqlMap namespace="libraryboard">
+ 	<typeAlias alias="libraryboardVO" type="kr.or.ddit.vo.LibraryboardVO"></typeAlias>
+ 	
+ 	<resultMap class="libraryboardVO" id="libraryboardMap">
+ 		<result property="bo_no" 		column="bo_no"/>
+		<result property="bo_title" 	column="bo_title"/>
+		<result property="bo_cont" 		column="bo_cont"/>
+		<result property="bo_date" 		column="bo_date"/>
+		<result property="bo_hit" 		column="bo_hit"/>
+		<result property="bo_status" 	column="bo_status"/>
+		<result property="bo_group" 	column="bo_group"/>
+		<result property="bo_seq" 		column="bo_seq"/>
+		<result property="bo_writer" 	column="bo_writer"/>
+		<result property="mem_id" 		column="mem_id"/>
+		<result property="items" column="bo_no" select="libraryFileitem.fileItemList"/>
+ 	</resultMap>
+ 	
+ 	<sql id = "selectAll">
+ 		SELECT *
+ 			FROM library_board
+ 		  WHERE bo_status = 'N'
+ 	</sql>
+ 	
+ 	<sql id="searchCondition">
+ 		<dynamic prepend="AND">
+			<isNotEmpty property="search_keyword" open="(" close=")"> 
+				<isEqual property="search_keycode" compareValue="TOTAL">
+						BO_TITLE 	LIKE '%'||#search_keyword#||'%'
+				  OR 	BO_CONT  LIKE '%'||#search_keyword#||'%'
+				  OR 	BO_WRITER 	LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="TITLE">
+						BO_TITLE LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="CONTENT">
+						BO_CONT LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="WRITER">
+						BO_WRITER LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+			</isNotEmpty>
+ 		</dynamic>
+ 	</sql>
+ 	
+ 	<select id="libraryList" parameterClass="map" resultClass="libraryboardVO">
+ 		SELECT B.*
+    	 FROM(SELECT ROWNUM rnum, A.* 
+	 			FROM (<include refid="selectAll"/>
+	 					AND BO_SEQ = '0'
+	 				  <include refid="searchCondition"/>
+	            		ORDER BY BO_NO) A) B
+		     <![CDATA[      		
+		     WHERE B.RNUM <= #startCount# 
+	 	       AND B.RNUM >= #endCount# 
+	 	       ]]>   
+	    ORDER BY RNUM DESC
+ 	</select>
+ 	  
+ 	<select id="libraryView" parameterClass="map" resultMap="libraryboardMap">
+ 		<include refid="selectAll"/>
+ 			AND bo_no = #bo_no#
+ 	</select>
+ 	
+ 	<insert id="insertLibraryInfo" parameterClass="libraryboardVO" >
+ 		<selectKey keyProperty="bo_no" resultClass="string"> 
+ 			SELECT LIBRARY_SEQ.NEXTVAL
+ 				FROM DUAL	
+ 		</selectKey>
+ 			INSERT INTO library_board(bo_no
+							,bo_title
+							,bo_cont
+							,bo_writer
+							,bo_date
+							,bo_status
+							,bo_group
+							,bo_seq
+							,mem_id
+								)
+						VALUES(	#bo_no#
+								,#bo_title#
+								,#bo_cont#
+								,#bo_writer#
+								,sysdate
+								,'N'
+								,#bo_no#
+								,'0'
+								,#mem_id#
+								)
+ 	</insert>
+ 	
+ 	<update id="updateHit" parameterClass="map">
+ 		UPDATE library_board 
+			SET bo_hit = CAST(bo_hit + 1 AS NUMBER(10))
+		WHERE bo_no = #bo_no#
+ 	</update>
+ 	
+ 	<select id="incrementSeq" parameterClass="libraryboardVO" resultClass="String">
+		SELECT 
+			MAX(BO_SEQ) + 1	
+		FROM library_board
+		WHERE BO_GROUP = #bo_group#
+	</select>
+	
+ 	<update id="updateLibraryInfo" parameterClass="libraryboardVO">
+ 		UPDATE library_board SET
+			bo_title	= #bo_title#
+			<isNotEmpty property="bo_cont">
+			,bo_cont	= #bo_cont#
+			</isNotEmpty>
+		WHERE bo_no = #bo_no#	 
+ 	</update>
+ 	
+	<update id="deleteLibraryInfo" parameterClass="map">
+ 		UPDATE library_board SET
+			bo_status	= 'Y'
+		WHERE bo_no = #bo_no#	 
+ 	</update> 	
+ 	
+ 	<select id="totalCount" parameterClass="map" resultClass="int">
+		SELECT COUNT(bo_no)
+			FROM library_board
+			WHERE BO_STATUS = 'N'
+			AND BO_SEQ 		= '0'
+			<include refid="searchCondition"/>
+	</select>
+	
+	<!-- 자료실 댓글 -->
+	<!-- 댓글리스트 출력 -->
+	<select id="libraryReplyList" parameterClass="map" resultMap="libraryboardMap">
+ 		<include refid="selectAll"/>
+            AND BO_GROUP = #bo_no#
+            <![CDATA[ 
+            AND BO_SEQ > '0'
+			]]>
+            ORDER BY BO_NO
+ 	</select>
+ 	
+ 	<!-- 댓글 삽입 -->
+ 	<insert id="insertLibraryReply" parameterClass="libraryboardVO">
+		<selectKey keyProperty="bo_no" resultClass="String">
+			SELECT LIBRARY_SEQ.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO library_board(
+								 BO_NO
+								,BO_CONT
+								,BO_WRITER
+								,BO_STATUS
+								,BO_GROUP
+								,BO_SEQ
+								,BO_DATE
+								,mem_id
+							)VALUES
+							(
+								 #bo_no#
+								,#bo_cont#
+								,#bo_writer#
+								,'N'
+								,#bo_group#
+								,#bo_seq#
+								,sysdate
+								,#mem_id#
+							)
+	</insert>
+	
+	<!-- 댓글 수정 -->
+	<update id="updateLibraryReply" parameterClass="libraryboardVO">
+		UPDATE library_board 
+		set bo_cont 	= #bo_cont#
+		<isNotEmpty property="mem_id">
+			,mem_id 	= #mem_id#
+		</isNotEmpty>
+		<isNotEmpty property="bo_writer">
+			,bo_writer 	= #bo_writer#
+		</isNotEmpty>
+		where bo_no 	= #bo_no#
+	</update>
+ </sqlMap>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

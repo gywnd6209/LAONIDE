@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- 
+		스프링 파일 업로드 설정
+			commons-io-?.?.?.jar
+			commons-fileupload.?.?.?.jar 필요 : pom에 있음
+			* CommonsMultipartResolver 빈 등록시 반드시 id(대소문자가림) = multipartResolver
+			p:maxUploadSize : 몇개를 업로드하든지 전체 사이즈 제한. 음수면 무제한
+			p:maxInMemorySize : 임시저장소, 디폴트 -1이라 생략
+			p:defaultEncoding : 한글파일명은 인코딩됨
+	 -->
+	 <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"
+	 	p:maxUploadSize="100000000"
+	 	p:defaultEncoding="UTF-8"></bean>
+</beans>

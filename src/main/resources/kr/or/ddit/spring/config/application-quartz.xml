@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+
+	<!-- 
+		쿼츠(Quartz)	: 스케줄러
+		  SchedulerFactory	: 스케줄러 관리(시작, 일시정지, 재시작, 종료)
+		  					  default SchedulerFactory 빈이 인스턴스화시 자동 스케줄 시작.
+		  					  @Autowired
+		  					  private SchedulerFactory
+		  					  
+		  					  factory.stop() // 일시정지
+		  					  factory.start() // 재시작
+		  					  factory.destroy() // 완전종료
+		  Trigger		   	: 설정된 스케줄을 기초로 비지니스 로직을 가지는 잡 클래스를 실행
+		  					  cron expression 설정
+		  Job				: 스케줄을 기초로 실행되어야 하는 비지니스 로직을 포함
+	 -->
+<!-- 	 <bean id="timeCheckJob" class="org.springframework.scheduling.quartz.JobDetailBean" -->
+<!-- 	 	p:jobClass="kr.or.ddit.quartz.job.TimeCheckJob"> -->
+<!-- 	 </bean> -->
+	 
+<!-- 	 <bean id="timeTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" -->
+<!-- 	 	p:jobDetail-ref="timeCheckJob" -->
+<!-- 	 	p:cronExpression="0/5 * * * * ?"> -->
+<!-- 	 </bean> -->
+	 <!-- 트리거 몇개든 쓸 수 있음! -->
+<!-- 	 <bean id="schedulerFactory" class="org.springframework.scheduling.quartz.SchedulerFactoryBean"> -->
+<!-- 	 	<property name="triggers"> -->
+<!-- 	 		<list> -->
+<!-- 	 			<ref bean="timeTrigger" /> -->
+<!-- 	 		</list> -->
+<!-- 	 	</property> -->
+<!-- 	 </bean> -->
+</beans>

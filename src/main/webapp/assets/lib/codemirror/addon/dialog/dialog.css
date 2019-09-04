@@ -1,0 +1,45 @@
+.CodeMirror-dialog {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background: inherit;
+    z-index: 15;
+    padding: .1em .8em;
+    overflow: hidden;
+    color: inherit;
+}
+
+.CodeMirror-dialog-top {
+    border-bottom: 1px solid #eee;
+    top: 0;
+}
+
+.CodeMirror-dialog-bottom {
+    border-top: 1px solid #eee;
+    bottom: 0px;
+}
+
+.cm-s-blackboard .CodeMirror-dialog-bottom,
+.cm-s-cobalt .CodeMirror-dialog-bottom,
+.cm-s-erlang-dark .CodeMirror-dialog-bottom,
+.cm-s-monokai .CodeMirror-dialog-bottom,
+.cm-s-rubyblue .CodeMirror-dialog-bottom,
+.cm-s-vibrant-ink .CodeMirror-dialog-bottom,
+.cm-s-xq-dark .CodeMirror-dialog-bottom,
+.cm-s-night .CodeMirror-dialog-bottom,
+.cm-s-sublime-text .CodeMirror-dialog-bottom {
+    border-color: #454545;
+}
+
+.CodeMirror-dialog input {
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 20em;
+    color: inherit;
+    font-family: monospace;
+}
+
+.CodeMirror-dialog button {
+    font-size: 70%;
+}

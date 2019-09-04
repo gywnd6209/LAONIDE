@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+ <sqlMap namespace="solboard">
+ 	<typeAlias alias="solboardVO" type="kr.or.ddit.vo.SolboardVO"></typeAlias>
+ 	
+ 	<resultMap class="solboardVO" id="solboardMap">
+ 		<result property="sol_no" 		column="sol_no"/>
+		<result property="err_no" 		column="err_no"/>
+		<result property="sol_cont" 	column="sol_cont"/>
+		<result property="sol_writer" 	column="sol_writer"/>
+		<result property="sol_del_ok" 	column="sol_del_ok"/>
+		<result property="sol_ok" 		column="sol_ok"/>
+		<result property="sol_reg_date" column="sol_reg_date"/>
+ 	</resultMap>
+ 	
+ 	<sql id = "selectAll">
+ 		SELECT *
+ 			FROM SOL_BOARD
+ 		  WHERE SOL_DEL_OK = 'N'
+ 	</sql>
+ 	
+ 	<select id="solboardInfo" parameterClass="map" resultMap="solboardMap">
+ 		<include refid="selectAll"/>
+ 		AND SOL_NO = #sol_no#
+ 		
+ 	</select>
+
+	<select id="solboardList" resultClass="solboardVO" parameterClass="map">
+		SELECT sol_NO,
+			ERR_NO,
+			SOL_CONT,
+			SOL_WRITER,
+			SOL_DEL_OK,
+			SOL_OK,
+			SOL_REG_DATE,
+			MEM_NICK
+ 			FROM SOL_BOARD, MEMBER
+ 		    WHERE SOL_DEL_OK = 'N'
+            AND ERR_NO = #err_no#
+            AND MEMBER.MEM_ID = SOL_BOARD.SOL_WRITER
+            order by SOL_NO
+		
+	</select>
+	
+	<insert id="insertSolboard" parameterClass="solboardVO">
+		
+		<selectKey keyProperty="sol_no" resultClass="String">
+			SELECT SOL_BOARD_SEQ.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO SOL_BOARD(
+								 SOL_NO
+								,ERR_NO
+								,SOL_CONT
+								,SOL_WRITER
+								,SOL_OK
+							)VALUES
+							(
+								 #sol_no#
+								,#err_no#
+								,#sol_cont#
+								,#sol_writer#
+								,#sol_ok#
+							)
+	</insert>
+	
+	<update id="deleteSolboard" parameterClass="map">
+		UPDATE SOL_BOARD
+		SET SOL_DEL_OK = 'Y'
+		WHERE SOL_NO = #sol_no#
+	</update>
+
+	<update id="updateSolboard" parameterClass="solboardVO">
+		UPDATE SOL_BOARD 
+		set SOL_CONT = #sol_cont#
+		<isNotEmpty property="sol_writer">
+			,sol_writer 	= #sol_writer#
+		</isNotEmpty>
+		where sol_no 		= #sol_no#
+	</update>
+	
+ </sqlMap>
+ 
+ 

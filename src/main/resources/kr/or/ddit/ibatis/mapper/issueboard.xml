@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+ <sqlMap namespace="issueboard">
+ 	<typeAlias alias="issueboardVO" type="kr.or.ddit.vo.IssueboardVO"></typeAlias>
+ 	
+<!--  	<resultMap class="issueboardVO" id="issueboardMap"> -->
+<!--  		<result property="isu_no" 				column="isu_no"/> -->
+<!-- 		<result property="isu_title" 			column="isu_title"/>s -->
+<!-- 		<result property="isu_cont" 			column="isu_cont"/> -->
+<!-- 		<result property="isu_writer" 			column="isu_writer"/> -->
+<!-- 		<result property="isu_reg_date" 		column="isu_reg_date"/> -->
+<!-- 		<result property="isu_goal_end_date" 	column="isu_goal_end_date"/> -->
+<!-- 		<result property="isu_rank" 			column="isu_rank"/> -->
+<!-- 		<result property="isu_end_ok" 			column="isu_end_ok"/> -->
+<!-- 		<result property="isu_del_ok" 			column="isu_del_ok"/> -->
+<!-- 		<result property="mem_id" 				column="mem_id"/> -->
+<!--  	</resultMap> -->
+ 	
+ 	<resultMap class="issueboardVO"    id="issueboardMap1">
+ 		<result property="isu_no" 				column="isu_no"/>
+		<result property="isu_title" 			column="isu_title"/>
+		<result property="isu_cont" 			column="isu_cont"/>
+		<result property="isu_writer" 			column="isu_writer"/>
+		<result property="isu_reg_date" 		column="isu_reg_date"/>
+		<result property="isu_goal_end_date" 	column="isu_goal_end_date"/>
+		<result property="isu_rank" 			column="isu_rank"/>
+		<result property="isu_end_ok" 			column="isu_end_ok"/>
+		<result property="isu_del_ok" 			column="isu_del_ok"/>
+		<result property="mem_id" 				column="mem_id"/>
+		<result property="pro_code" 			column="pro_code"/>
+		<result property="isu_manager" 			column="isu_manager"/>
+<!-- 		<result property="rnum" 				column="rnum"/> -->
+ 	</resultMap>
+ 	
+ 	<sql id = "selectAll">
+ 		SELECT *
+ 			FROM ISSUE_BOARD
+ 		  WHERE PRO_CODE = #pro_code#
+ 	</sql>
+ 	
+ 	<sql id = "selectAll1">
+ 		SELECT *
+ 			FROM ISSUE_BOARD
+ 		  WHERE PRO_CODE = #pro_code# AND ISU_DEL_OK = 'N'
+ 	</sql>
+ 	
+ 	<sql id="searchCondition">
+ 		<dynamic prepend="AND">
+			<isNotEmpty property="search_keyword" open="(" close=")"> 
+				<isEqual property="search_keycode" compareValue="TOTAL">
+						BO_TITLE 	LIKE '%'||#search_keyword#||'%'
+				  OR 	BO_CONT  LIKE '%'||#search_keyword#||'%'
+				  OR 	BO_WRITER 	LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="TITLE">
+						BO_TITLE LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="CONTENT">
+						BO_CONT LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="WRITER">
+						BO_WRITER LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+			</isNotEmpty>
+ 		</dynamic>
+ 	</sql>
+ 	
+ 	<sql id="searchCondition1">
+ 		<dynamic prepend="AND">
+			<isNotEmpty property="search_keyword" open="(" close=")"> 
+				<isEqual property="search_keycode" compareValue="TOTAL">
+						ISU_TITLE 	LIKE '%'||#search_keyword#||'%'
+				  OR 	ISU_RANK    LIKE '%'||#search_keyword#||'%'
+				  OR 	ISU_WRITER 	LIKE '%'||#search_keyword#||'%'
+				  OR 	ISU_END_OK 	LIKE '%'||#search_keyword#||'%'
+				  OR 	ISU_MANAGER LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="TITLE">
+						ISU_TITLE LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="WRITER">
+						ISU_WRITER LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="PRIORITY">
+						ISU_RANK LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="COMPLETED">
+						ISU_END_OK LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="MANAGER">
+						ISU_MANAGER LIKE '%'||#search_keyword#||'%'
+				</isEqual>
+			</isNotEmpty>
+ 		</dynamic>
+ 	</sql>
+ 	
+ 	<statement id="issueList" resultClass="issueboardVO">
+ 		SELECT * FROM ISSUE_BOARD 
+   			WHERE PRO_CODE = #pro_code#
+   			  AND ISU_DEL_OK = 'N'
+   			   <![CDATA[
+   			  AND ROWNUM <=5
+   			   ]]>  
+   			ORDER BY ISU_NO DESC
+ 	</statement>
+ 	  
+ 	<select id="issueboardInfo" parameterClass="map" resultMap="issueboardMap1">
+ 		<include refid="selectAll1"/>
+ 		AND ISU_NO = #isu_no#
+ 		
+ 	</select>
+
+	<select id="issueboardList" resultClass="issueboardVO" parameterClass="map">
+		SELECT B.*
+		FROM (SELECT ROWNUM RNUM, A.*
+				FROM (	<include refid="selectAll1"/>
+				 		AND PRO_CODE = #pro_code#
+				 		<include refid="searchCondition1"/>
+			        	ORDER BY ISU_NO) A ) B
+		<![CDATA[ 
+		WHERE B.RNUM <= #startCount#
+		  AND B.RNUM >= #endCount#
+		]]>
+		ORDER BY RNUM DESC
+	</select>
+	
+	<insert id="insertIssueboard" parameterClass="issueboardVO">
+		<selectKey keyProperty="isu_no" resultClass="String">
+			SELECT ISSUE_BOARD_SEQ.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO ISSUE_BOARD(
+								 ISU_NO
+								,ISU_TITLE
+								,ISU_CONT
+								,ISU_WRITER
+								,ISU_GOAL_END_DATE
+								,ISU_RANK
+								,PRO_CODE
+								,MEM_ID
+								,ISU_MANAGER
+							)VALUES
+							(
+								 #isu_no#
+								,#isu_title#
+								,#isu_cont#
+								,#isu_writer#
+								,to_date(#isu_goal_end_date#, 'YYYY-MM-DD')
+								,#isu_rank#
+								,#pro_code#
+								,#mem_id#
+								,#isu_manager#
+							)
+	</insert>
+	
+	<!-- 스케쥴 추가용 -->
+	<insert id="insertSchedule1" parameterClass="issueboardVO" >
+		<selectKey keyProperty="schedule_no" resultClass="String">
+			SELECT SCHEDULE_SEQ.NEXTVAL 
+			FROM DUAL 
+		</selectKey>
+		
+		INSERT INTO SCHEDULE ( 
+								SCHEDULE_NO,
+								TITLE,
+								DESCRIPTION,
+								STARTDATE,
+								ENDDATE,
+								TYPE,
+								USERNAME,
+								BACKGROUNDCOLOR,
+								TEXTCOLOR,
+								ALLDAY,
+								PRO_CODE, 
+								BO_NO
+							) VALUES 
+							(
+								 #schedule_no#
+								,#isu_title#
+								,#isu_cont#
+								,sysdate
+								,to_date(#isu_goal_end_date#, 'yyyy-MM-dd HH24:mi')
+								,'이슈'
+								,#mem_id#
+								,'##ffa94d'
+								,'##ffffff'
+								,'false'
+								,#pro_code#
+								,#isu_no#
+							)
+							
+	</insert>
+	
+	<update id="deleteIssueboard" parameterClass="map">
+		UPDATE ISSUE_BOARD
+		SET ISU_DEL_OK = 'Y'
+		WHERE ISU_NO = #isu_no#
+	</update>
+
+	<update id="updateIssueboard" parameterClass="issueboardVO">
+		UPDATE ISSUE_BOARD 
+		set ISU_TITLE 		= #isu_title#
+		<isNotEmpty property="isu_writer">
+			,isu_writer 	= #isu_writer#
+		</isNotEmpty>
+		<isNotEmpty property="isu_cont">
+			,isu_cont 	= #isu_cont#
+		</isNotEmpty>
+		<isNotEmpty property="isu_reg_date">
+			,isu_reg_date 	= sysdate
+		</isNotEmpty>
+		<isNotEmpty property="isu_goal_end_date">
+			,isu_goal_end_date 	= to_date(#isu_goal_end_date#, 'YYYY-MM-DD')
+		</isNotEmpty>
+		<isNotEmpty property="isu_rank">
+			,isu_rank 	= #isu_rank#
+		</isNotEmpty>
+		<isNotEmpty property="isu_manager">
+			,isu_manager 	= #isu_manager#
+		</isNotEmpty>
+		where isu_no 		= #isu_no#
+	</update>
+
+	<select id="totalIssueboardCount" parameterClass="map" resultClass="int">
+		SELECT COUNT(ISU_NO) 
+		FROM ISSUE_BOARD
+		WHERE ISU_DEL_OK 	= 'N'
+			AND PRO_CODE 	= #pro_code#
+		<include refid="searchCondition1"/>
+	</select>
+	
+	<update id="updateIssueboard_end" parameterClass="issueboardVO">
+		UPDATE ISSUE_BOARD
+		set ISU_END_OK = 'Y'
+		WHERE ISU_NO = #isu_no#
+	</update>
+	
+ </sqlMap>

@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Config모두 지우셈 -->
+<!DOCTYPE sqlMap
+   PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+   "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="member">
+	<typeAlias alias="memberVO" type="kr.or.ddit.vo.MemberVO"></typeAlias>
+
+	<resultMap id="memberMap" 			class="memberVO">
+		<result property="mem_id" 		column="mem_id"/>
+		<result property="mem_nick" 	column="mem_nick"/>
+		<result property="mem_pass" 	column="mem_pass"/>
+		<result property="mem_mail" 	column="mem_mail"/>
+		<result property="lang_code" 	column="lang_code"/>
+		<result property="join_date" 	column="join_date"/>
+		<result property="mem_del" 		column="mem_del"/>
+		<result property="mem_key" 		column="mem_key"/>
+		<result property="rnum" 		column="rnum"/>
+		<result property="mem_grade" 	column="mem_grade"/>
+	</resultMap>
+	
+	<!-- 반복되는 쿼리는 따로 빼놓을 수 있음 -->
+	<sql id="selectAll">
+		select *
+		from member
+		where mem_del = 'n'
+		and mem_grade = 'user'
+	</sql>
+	
+	<sql id="selectAll_all">
+		select *
+		from member
+		where mem_del = 'n'
+	</sql>
+	
+	<sql id="searchCondition">
+		<dynamic prepend="and">
+			<isNotEmpty property="search_keyword" open="(" close=")"> 
+				<isEqual property="search_keycode" compareValue="total">
+					mem_id like '%'||#search_keyword#||'%'
+					or mem_mail like '%'||#search_keyword#||'%'
+					or mem_nick like '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="id">
+						mem_id like '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="nick">
+						mem_nick like '%'||#search_keyword#||'%'
+				</isEqual>
+				<isEqual property="search_keycode" compareValue="mail">
+						mem_mail like '%'||#search_keyword#||'%'
+				</isEqual>
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+
+	<statement id="memberInfo2" resultClass="memberVO">
+		SELECT MEM_ID, MEM_NICK, MEM_PASS, MEM_MAIL, LANG_CODE, LANG_LEVEL, JOIN_DATE, MEM_DEL, MEM_GRADE
+            FROM MEMBER
+         WHERE MEM_ID = #mem_id#
+	</statement>
+
+	<!-- 회원 상세정보 -->
+	<select id="memberInfo" parameterClass="map" resultClass="memberVO">
+		<include refid="selectAll" />
+		and mem_id = #mem_id#
+		<dynamic prepend="AND">
+			<isNotEmpty property="mem_pass"><!-- isNotEmpty안에있는것이 참이면 앞에 and가 붙는다. -->
+				MEM_PASS = #mem_pass#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 관리자,회원 상세정보 -->
+	<select id="memberInfo_all" parameterClass="map" resultClass="memberVO">
+		<include refid="selectAll_all" />
+		and mem_id = #mem_id#
+		<dynamic prepend="AND">
+			<isNotEmpty property="mem_pass"><!-- isNotEmpty안에있는것이 참이면 앞에 and가 붙는다. -->
+				MEM_PASS = #mem_pass#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<select id="memberList" parameterClass="map" resultClass="memberVO">
+		select b.* from
+		(select rownum rnum , a.*
+			from (<include refid="selectAll"/>
+					<include refid="searchCondition"/>) a) b
+		<![CDATA[
+			where b.rnum <= #startCount#
+				and b.rnum >= #endCount#
+		]]>
+		order by rnum desc
+	</select>
+	
+	<select id="totalCount" parameterClass="map" resultClass="int">
+		SELECT COUNT(join_date)
+			FROM member
+			WHERE mem_del = 'n'
+		<include refid="searchCondition"/>
+	</select>
+
+	<insert id="insertMember" parameterClass="memberVO">
+		insert into member(mem_id, mem_nick, mem_pass, mem_mail, lang_code, lang_level, join_date, mem_del)
+		values(#mem_id#, #mem_nick#, #mem_pass#, #mem_mail#, #lang_code#, #lang_level#, sysdate, 'n')
+	</insert>
+
+	<update id="deleteMember" parameterClass="map">
+		update member
+		set mem_del ='y'
+		where mem_id = #mem_id#
+	</update>
+	
+	<update id="deleteChecked" parameterClass="map">
+		<![CDATA[
+			update member set  
+				mem_del = 'y' 
+			where mem_id = #checkbox# 
+		]]>
+	</update>
+	
+	<update id="updateMember" parameterClass="memberVO">
+		update member set 
+			mem_nick = #mem_nick#,
+			mem_pass = #mem_pass#,
+			mem_mail = #mem_mail#,
+			lang_code = #lang_code#,
+			lang_level = #lang_level# 
+		where mem_id = #mem_id# 
+	</update>
+	
+	<update id="updateProfile" parameterClass="memberVO" > 
+		update member set  
+			mem_nick = #mem_nick#, 
+			mem_pass = #mem_pass#,
+			mem_mail = #mem_mail#, 
+			lang_code = #lang_code#, 
+			lang_level = #lang_level# 
+		where mem_id = #mem_id#  
+	</update>
+	
+	<update id="updatePass" parameterClass="memberVO">
+		update member set
+			mem_pass = #mem_pass#
+		where mem_id = #mem_id#
+	</update>
+
+	<!-- 아이디 중복체크 -->
+	<select id="idChk" parameterClass="map" resultClass="memberVO">
+		<include refid="selectAll" />
+		and mem_id = #mem_id#
+	</select>
+
+	<!-- 닉네임 중복체크 -->
+	<select id="nickChk" parameterClass="map" resultClass="memberVO">
+		<include refid="selectAll" />
+		and mem_nick = #mem_nick#
+	</select>
+   
+   <!-- 아이디 찾기 -->
+   <select id="memberInfo_id" parameterClass="map"  resultClass="memberVO">
+      <include refid="selectAll"/>
+      and mem_mail = #mem_mail#
+   </select>
+   
+   <!-- 비밀번호 찾기 -->
+   <select id="memberInfo_pw" parameterClass="map"  resultClass="memberVO">
+      <include refid="selectAll"/>
+      and mem_id = #mem_id#
+      <dynamic prepend="and">
+         <isNotEmpty property="mem_mail">
+            mem_mail = #mem_mail#
+         </isNotEmpty>
+      </dynamic>
+   </select>
+   
+   <!-- 임시비밀번호 업데이트 -->
+   <update id="updateMember_pw" parameterClass="map">
+      update member set 
+         mem_nick = mem_nick, 
+         mem_pass = #mem_pass#, 
+         mem_mail = mem_mail, 
+         lang_code = lang_code, 
+         lang_level = lang_level
+      where mem_id = #mem_id#
+   </update>
+   
+   <!-- 카톡 회원 확인 -->
+   <select id="memberKtInfo" parameterClass="map"  resultClass="memberVO">
+      <include refid="selectAll"/>
+      and mem_id = #mem_id#
+   </select>
+   
+   <!-- 카톡으로 회원가입 -->
+   <insert id="insertKt" parameterClass="memberVO">
+      insert into member(mem_id, mem_nick, mem_mail)
+         values(#mem_id#, #mem_nick#, #mem_mail#)
+   </insert>
+   
+   <!-- 카톡 닉네임 중복확인 -->
+   <select id="ktnickInfo" parameterClass="map"  resultClass="memberVO">
+      <include refid="selectAll"/>
+      and mem_nick = #mem_nick#
+   </select>
+   <!-- 카톡 이메일 중복확인 -->
+   <select id="ktmailInfo" parameterClass="map"  resultClass="memberVO">
+      <include refid="selectAll"/>
+      and mem_mail = #mem_mail#
+   </select>
+</sqlMap>
+
+
